@@ -112,46 +112,53 @@
             <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Analysis</h1>
                 <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
-                    <div class="space-y-8">
+                    <div class="space-y-6">
                         <!-- Monthly Goal Status -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <h2 class="text-2xl font-bold text-white mb-4">Monthly Goal Progress</h2>
+                        <div class="bg-black/50 border border-white rounded-lg p-4">
+                            <h2 class="text-xl font-bold text-white mb-3">Monthly Goal Progress</h2>
                             <div id="goal-progress-container">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-white text-lg">Goal: <span id="display-monthly-goal" class="font-bold">$0.00</span></span>
-                                    <span class="text-white text-lg">Orders Needed: <span id="orders-needed" class="font-bold">0</span></span>
+                                    <span class="text-white text-sm">Goal: <span id="display-monthly-goal" class="font-bold">$0.00</span></span>
+                                    <span class="text-white text-sm">Orders Needed: <span id="orders-needed" class="font-bold">0</span></span>
                                 </div>
-                                <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
-                                    <div id="progress-bar" class="bg-white h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                <div class="w-full bg-gray-700 rounded-full h-3 mb-3">
+                                    <div id="progress-bar" class="bg-white h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
                                 </div>
-                                <p id="progress-message" class="text-white text-center text-lg">Enter your monthly goal in settings to see progress</p>
+                                <p id="progress-message" class="text-white text-center text-sm">Enter your monthly goal in settings to see progress</p>
                             </div>
                         </div>
 
-                        <!-- Daily Targets -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-black/50 border border-white rounded-lg p-6">
-                                <h3 class="text-xl font-bold text-white mb-2">Daily Target</h3>
-                                <p class="text-white text-3xl font-bold" id="daily-target">$0.00</p>
-                                <p class="text-white text-sm mt-1" id="daily-orders">0 orders per day</p>
-                            </div>
-                            <div class="bg-black/50 border border-white rounded-lg p-6">
-                                <h3 class="text-xl font-bold text-white mb-2">Weekly Target</h3>
-                                <p class="text-white text-3xl font-bold" id="weekly-target">$0.00</p>
-                                <p class="text-white text-sm mt-1" id="weekly-orders">0 orders per week</p>
+                        <!-- Targets (All in one card) -->
+                        <div class="bg-black/50 border border-white rounded-lg p-4">
+                            <h3 class="text-lg font-bold text-white mb-3">Targets</h3>
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <p class="text-white text-xs text-gray-400">Daily</p>
+                                    <p class="text-white text-xl font-bold" id="daily-target">$0.00</p>
+                                    <p class="text-white text-xs" id="daily-orders">0/day</p>
+                                </div>
+                                <div>
+                                    <p class="text-white text-xs text-gray-400">Weekly</p>
+                                    <p class="text-white text-xl font-bold" id="weekly-target">$0.00</p>
+                                    <p class="text-white text-xs" id="weekly-orders">0/week</p>
+                                </div>
+                                <div>
+                                    <p class="text-white text-xs text-gray-400">Monthly</p>
+                                    <p class="text-white text-xl font-bold" id="display-monthly-goal-mini">$0.00</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Average Per Order -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <h3 class="text-xl font-bold text-white mb-2">Average Per Delivery Order</h3>
-                            <p class="text-white text-3xl font-bold" id="display-avg-per-order">$0.00</p>
-                        </div>
-
-                        <!-- Calculation Summary -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">Calculation Summary</h3>
-                            <div class="space-y-2 text-white" id="calculation-summary">
+                        <!-- Stats Summary (Average + Calculation Summary combined) -->
+                        <div class="bg-black/50 border border-white rounded-lg p-4">
+                            <h3 class="text-lg font-bold text-white mb-3">Summary</h3>
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <p class="text-white text-xs text-gray-400">Average Per Order</p>
+                                    <p class="text-white text-2xl font-bold" id="display-avg-per-order">$0.00</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-white text-sm" id="calculation-summary">
                                 <p>Enter your monthly goal and average per order in settings to see calculated targets.</p>
                             </div>
                         </div>
@@ -460,6 +467,7 @@
 
             // Update display values
             document.getElementById('display-monthly-goal').textContent = `$${monthlyGoal.toFixed(2)}`;
+            document.getElementById('display-monthly-goal-mini').textContent = `$${monthlyGoal.toFixed(2)}`;
             document.getElementById('display-avg-per-order').textContent = `$${avgPerOrder.toFixed(2)}`;
 
             if (monthlyGoal > 0 && avgPerOrder > 0) {
@@ -471,13 +479,13 @@
                 const dailyTarget = monthlyGoal / 30;
                 document.getElementById('daily-target').textContent = `$${dailyTarget.toFixed(2)}`;
                 const dailyOrders = Math.ceil(dailyTarget / avgPerOrder);
-                document.getElementById('daily-orders').textContent = `${dailyOrders} orders per day`;
+                document.getElementById('daily-orders').textContent = `${dailyOrders}/day`;
 
                 // Calculate weekly target (4 weeks per month)
                 const weeklyTarget = monthlyGoal / 4;
                 document.getElementById('weekly-target').textContent = `$${weeklyTarget.toFixed(2)}`;
                 const weeklyOrders = Math.ceil(weeklyTarget / avgPerOrder);
-                document.getElementById('weekly-orders').textContent = `${weeklyOrders} orders per week`;
+                document.getElementById('weekly-orders').textContent = `${weeklyOrders}/week`;
 
                 // Update progress message
                 document.getElementById('progress-message').textContent = `You need ${ordersNeeded} orders at $${avgPerOrder.toFixed(2)} per order to reach your $${monthlyGoal.toFixed(2)} goal.`;
@@ -487,8 +495,6 @@
                     <p>• Monthly Goal: $${monthlyGoal.toFixed(2)}</p>
                     <p>• Average per Order: $${avgPerOrder.toFixed(2)}</p>
                     <p>• Total Orders Needed: ${ordersNeeded}</p>
-                    <p>• Daily Target: $${dailyTarget.toFixed(2)} (${dailyOrders} orders)</p>
-                    <p>• Weekly Target: $${weeklyTarget.toFixed(2)} (${weeklyOrders} orders)</p>
                 `;
 
                 // Calculate progress (if we have delivery data in the future)
@@ -499,9 +505,9 @@
                 // Reset displays if no values
                 document.getElementById('orders-needed').textContent = '0';
                 document.getElementById('daily-target').textContent = '$0.00';
-                document.getElementById('daily-orders').textContent = '0 orders per day';
+                document.getElementById('daily-orders').textContent = '0/day';
                 document.getElementById('weekly-target').textContent = '$0.00';
-                document.getElementById('weekly-orders').textContent = '0 orders per week';
+                document.getElementById('weekly-orders').textContent = '0/week';
                 document.getElementById('progress-bar').style.width = '0%';
                 document.getElementById('progress-message').textContent = 'Enter your monthly goal and average per order in settings to see calculated targets.';
                 document.getElementById('calculation-summary').innerHTML = '<p>Enter your monthly goal and average per order in settings to see calculated targets.</p>';
@@ -613,6 +619,11 @@
         // Right-click handler
         contentArea.addEventListener('contextmenu', (e) => {
             e.preventDefault();
+            openTabSelector();
+        });
+
+        // Double-click handler
+        contentArea.addEventListener('dblclick', (e) => {
             openTabSelector();
         });
 
