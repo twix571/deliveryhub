@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PNG Icons</title>
+</head>
+<body>
+    <h1>Generate PNG Icons</h1>
+    <p>Click the buttons to generate PNG icons from SVG sources:</p>
+    <button onclick="generateIcon('icon-192.svg', 'icon-192.png', 192)">Generate 192x192 PNG</button>
+    <button onclick="generateIcon('icon-512.svg', 'icon-512.png', 512)">Generate 512x512 PNG</button>
+    <p id="status"></p>
+
+    <script>
+        async function generateIcon(svgPath, pngPath, size) {
+            const status = document.getElementById('status');
+            status.textContent = `Generating ${pngPath}...`;
+
+            try {
+                const response = await fetch(svgPath);
+                const svgText = await response.text();
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                const img = new Image();
+                const svgBlob = new Blob([svgText], {type: 'image/svg+xml'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const pngUrl = canvas.toDataURL('image/png');
+                    
+                    const a = document.createElement('a');
+                    a.href = pngUrl;
+                    a.download = pngPath;
+                    a.click();
+                    
+                    URL.revokeObjectURL(url);
+                    status.textContent = `${pngPath} generated and downloaded!`;
+                };
+                
+                img.src = url;
+            } catch (error) {
+                status.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

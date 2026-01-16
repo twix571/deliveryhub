@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Goals</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" sizes="192x192" href="icon-192.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Hide scrollbar but allow scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-black min-h-screen">
+    <div id="main-container" class="relative w-full h-screen overflow-hidden">
+        <!-- Tab Selector (Hidden by default) -->
+        <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div class="flex flex-col gap-4 items-center">
+                <button onclick="switchTab('deliveries')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
+                    Deliveries
+                </button>
+                <button onclick="switchTab('analysis')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
+                    Analysis
+                </button>
+                <button onclick="switchTab('settings')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
+                    Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="content-area" class="w-full h-full flex items-center justify-center">
+            <!-- Deliveries Section -->
+            <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Deliveries</h1>
+                <div class="bg-black border border-white rounded-lg p-6">
+                    <p class="text-white">Track your deliveries here</p>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Analysis</h1>
+                <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
+                    <div class="space-y-8">
+                        <!-- Monthly Goal Status -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <h2 class="text-2xl font-bold text-white mb-4">Monthly Goal Progress</h2>
+                            <div id="goal-progress-container">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-white text-lg">Goal: <span id="display-monthly-goal" class="font-bold">$0.00</span></span>
+                                    <span class="text-white text-lg">Orders Needed: <span id="orders-needed" class="font-bold">0</span></span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                                    <div id="progress-bar" class="bg-white h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <p id="progress-message" class="text-white text-center text-lg">Enter your monthly goal in settings to see progress</p>
+                            </div>
+                        </div>
+
+                        <!-- Daily Targets -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-black/50 border border-white rounded-lg p-6">
+                                <h3 class="text-xl font-bold text-white mb-2">Daily Target</h3>
+                                <p class="text-white text-3xl font-bold" id="daily-target">$0.00</p>
+                                <p class="text-white text-sm mt-1" id="daily-orders">0 orders per day</p>
+                            </div>
+                            <div class="bg-black/50 border border-white rounded-lg p-6">
+                                <h3 class="text-xl font-bold text-white mb-2">Weekly Target</h3>
+                                <p class="text-white text-3xl font-bold" id="weekly-target">$0.00</p>
+                                <p class="text-white text-sm mt-1" id="weekly-orders">0 orders per week</p>
+                            </div>
+                        </div>
+
+                        <!-- Average Per Order -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <h3 class="text-xl font-bold text-white mb-2">Average Per Delivery Order</h3>
+                            <p class="text-white text-3xl font-bold" id="display-avg-per-order">$0.00</p>
+                        </div>
+
+                        <!-- Calculation Summary -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">Calculation Summary</h3>
+                            <div class="space-y-2 text-white" id="calculation-summary">
+                                <p>Enter your monthly goal and average per order in settings to see calculated targets.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Settings</h1>
+                <div class="bg-black border border-white rounded-lg p-6 max-w-2xl">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="monthly-goal" class="block text-white text-lg font-medium mb-2">Monthly Goal ($)</label>
+                            <input type="number" id="monthly-goal" step="0.01" min="0" placeholder="Enter your monthly goal"
+                                class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                            <p class="text-white text-sm mt-1">Target earnings for the month</p>
+                        </div>
+                        <div>
+                            <label for="avg-per-order" class="block text-white text-lg font-medium mb-2">Average $ per Delivery Order</label>
+                            <input type="number" id="avg-per-order" step="0.01" min="0" placeholder="Enter average per order"
+                                class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                            <p class="text-white text-sm mt-1">Average earnings per delivery order</p>
+                        </div>
+                        <button onclick="saveSettings()" class="w-full bg-black border border-white text-white text-lg font-semibold py-3 px-6 rounded-lg transition-colors">
+                            Save Settings
+                        </button>
+                        <p id="save-message" class="text-white text-center hidden">Settings saved successfully!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Default Welcome Screen -->
+            <div id="welcome-screen" class="text-center">
+                <h1 class="text-3xl md:text-5xl font-bold text-white mb-4">Delivery Goals</h1>
+                <p class="text-white text-lg md:text-xl mb-8">Double-click anywhere or tap the button to open tabs</p>
+                <button id="menu-button" class="bg-black border border-white text-white text-lg font-semibold py-3 px-8 rounded-lg transition-colors shadow-lg">
+                    Open Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(() => {
+                console.log('Service Worker registered');
+            }).catch(err => {
+                console.log('Service Worker registration failed', err);
+            });
+        }
+
+        const tabSelector = document.getElementById('tab-selector');
+        const contentArea = document.getElementById('content-area');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainContainer = document.getElementById('main-container');
+        const menuButton = document.getElementById('menu-button');
+
+        // Debounce function to prevent excessive saves
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Comprehensive app data structure
+        let appData = {
+            settings: {
+                monthlyGoal: '',
+                avgPerOrder: ''
+            },
+            deliveries: [],
+            analysis: {
+                totalEarnings: 0,
+                totalDeliveries: 0,
+                averagePerDelivery: 0
+            },
+            ui: {
+                currentTab: '',
+                lastVisited: Date.now()
+            }
+        };
+
+        // Save all app data to localStorage
+        function saveAllData() {
+            const dataToSave = {
+                ...appData,
+                settings: {
+                    monthlyGoal: document.getElementById('monthly-goal')?.value || '',
+                    avgPerOrder: document.getElementById('avg-per-order')?.value || ''
+                },
+                ui: {
+                    ...appData.ui,
+                    currentTab: getCurrentActiveTab(),
+                    lastVisited: Date.now()
+                }
+            };
+            localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
+            console.log('All data saved successfully');
+        }
+
+        // Save scroll position
+        function saveScrollPositions() {
+            const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
+                }
+            });
+        }
+
+        // Restore scroll position for a specific section
+        function restoreScrollPosition(sectionId) {
+            const savedScroll = localStorage.getItem(`scroll_${sectionId}`);
+            if (savedScroll !== null) {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollTop = parseInt(savedScroll, 10);
+                }
+            }
+        }
+
+        // Get currently active tab
+        function getCurrentActiveTab() {
+            const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
+            for (const sectionId of sections) {
+                const section = document.getElementById(sectionId);
+                if (section && !section.classList.contains('hidden')) {
+                    return sectionId.replace('-section', '');
+                }
+            }
+            return '';
+        }
+
+        // Load all app data from localStorage
+        function loadAllData() {
+            const savedData = localStorage.getItem('orderCalcData');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    appData = parsedData;
+
+                    // Restore settings
+                    if (parsedData.settings?.monthlyGoal !== undefined) {
+                        document.getElementById('monthly-goal').value = parsedData.settings.monthlyGoal;
+                    }
+                    if (parsedData.settings?.avgPerOrder !== undefined) {
+                        document.getElementById('avg-per-order').value = parsedData.settings.avgPerOrder;
+                    }
+
+                    // Restore previous tab if available
+                    if (parsedData.ui?.currentTab) {
+                        // Small delay to ensure DOM is ready
+                        setTimeout(() => {
+                            restoreUIState(parsedData.ui.currentTab);
+                        }, 100);
+                    }
+
+                    console.log('All data loaded successfully');
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                }
+            }
+        }
+
+        // Restore UI state (tab and scroll position)
+        function restoreUIState(tab) {
+            if (tab && document.getElementById(`${tab}-section`)) {
+                switchTab(tab);
+                // Restore scroll position after tab is visible
+                setTimeout(() => {
+                    restoreScrollPosition(`${tab}-section`);
+                }, 150);
+            }
+        }
+
+        // Load settings from localStorage (legacy function, kept for compatibility)
+        function loadSettings() {
+            loadAllData();
+        }
+
+        // Save settings to localStorage (legacy function, kept for compatibility)
+        function saveSettings() {
+            saveAllData();
+
+            const saveMessage = document.getElementById('save-message');
+            saveMessage.classList.remove('hidden');
+            setTimeout(() => {
+                saveMessage.classList.add('hidden');
+            }, 2000);
+
+            // Update analysis and navigate to analysis page after saving
+            updateAnalysis();
+            setTimeout(() => {
+                switchTab('analysis');
+            }, 500);
+        }
+
+        // Calculate and update analysis page
+        function updateAnalysis() {
+            const monthlyGoal = parseFloat(document.getElementById('monthly-goal')?.value) || 0;
+            const avgPerOrder = parseFloat(document.getElementById('avg-per-order')?.value) || 0;
+
+            // Update display values
+            document.getElementById('display-monthly-goal').textContent = `$${monthlyGoal.toFixed(2)}`;
+            document.getElementById('display-avg-per-order').textContent = `$${avgPerOrder.toFixed(2)}`;
+
+            if (monthlyGoal > 0 && avgPerOrder > 0) {
+                // Calculate orders needed
+                const ordersNeeded = Math.ceil(monthlyGoal / avgPerOrder);
+                document.getElementById('orders-needed').textContent = ordersNeeded;
+
+                // Calculate daily target (assuming 30 days per month)
+                const dailyTarget = monthlyGoal / 30;
+                document.getElementById('daily-target').textContent = `$${dailyTarget.toFixed(2)}`;
+                const dailyOrders = Math.ceil(dailyTarget / avgPerOrder);
+                document.getElementById('daily-orders').textContent = `${dailyOrders} orders per day`;
+
+                // Calculate weekly target (4 weeks per month)
+                const weeklyTarget = monthlyGoal / 4;
+                document.getElementById('weekly-target').textContent = `$${weeklyTarget.toFixed(2)}`;
+                const weeklyOrders = Math.ceil(weeklyTarget / avgPerOrder);
+                document.getElementById('weekly-orders').textContent = `${weeklyOrders} orders per week`;
+
+                // Update progress message
+                document.getElementById('progress-message').textContent = `You need ${ordersNeeded} orders at $${avgPerOrder.toFixed(2)} per order to reach your $${monthlyGoal.toFixed(2)} goal.`;
+
+                // Update calculation summary
+                document.getElementById('calculation-summary').innerHTML = `
+                    <p>• Monthly Goal: $${monthlyGoal.toFixed(2)}</p>
+                    <p>• Average per Order: $${avgPerOrder.toFixed(2)}</p>
+                    <p>• Total Orders Needed: ${ordersNeeded}</p>
+                    <p>• Daily Target: $${dailyTarget.toFixed(2)} (${dailyOrders} orders)</p>
+                    <p>• Weekly Target: $${weeklyTarget.toFixed(2)} (${weeklyOrders} orders)</p>
+                `;
+
+                // Calculate progress (if we have delivery data in the future)
+                const currentEarnings = appData.analysis?.totalEarnings || 0;
+                const progressPercent = Math.min((currentEarnings / monthlyGoal) * 100, 100);
+                document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            } else {
+                // Reset displays if no values
+                document.getElementById('orders-needed').textContent = '0';
+                document.getElementById('daily-target').textContent = '$0.00';
+                document.getElementById('daily-orders').textContent = '0 orders per day';
+                document.getElementById('weekly-target').textContent = '$0.00';
+                document.getElementById('weekly-orders').textContent = '0 orders per week';
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-message').textContent = 'Enter your monthly goal and average per order in settings to see calculated targets.';
+                document.getElementById('calculation-summary').innerHTML = '<p>Enter your monthly goal and average per order in settings to see calculated targets.</p>';
+            }
+        }
+
+        function openTabSelector() {
+            tabSelector.classList.remove('hidden');
+        }
+
+        // Right-click handler
+        contentArea.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openTabSelector();
+        });
+
+        // Button click handler
+        menuButton.addEventListener('click', () => {
+            openTabSelector();
+        });
+
+        // Single-click on tab selector to close
+        tabSelector.addEventListener('click', (e) => {
+            if (e.target === tabSelector) {
+                tabSelector.classList.add('hidden');
+            }
+        });
+
+        // Close tab selector on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                tabSelector.classList.add('hidden');
+            }
+        });
+
+        function switchTab(tab) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Hide welcome screen
+            welcomeScreen.classList.add('hidden');
+
+            // Show selected section
+            document.getElementById(`${tab}-section`).classList.remove('hidden');
+
+            // Close tab selector
+            tabSelector.classList.add('hidden');
+
+            // Load settings if switching to settings tab
+            if (tab === 'settings') {
+                loadSettings();
+            }
+        }
+
+        // Load settings on page load
+        loadSettings();
+
+        // Add scroll event listeners to save positions
+        const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.addEventListener('scroll', debounce(() => {
+                    localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
+                }, 200));
+            }
+        });
+
+        // Auto-save on input changes
+        document.getElementById('monthly-goal')?.addEventListener('change', saveAllData);
+        document.getElementById('monthly-goal')?.addEventListener('input', debounce(() => saveAllData(), 500));
+        document.getElementById('avg-per-order')?.addEventListener('change', saveAllData);
+        document.getElementById('avg-per-order')?.addEventListener('input', debounce(() => saveAllData(), 500));
+
+        // Auto-save when switching tabs
+        const originalSwitchTab = switchTab;
+        switchTab = function(tab) {
+            // Save scroll position before switching
+            saveScrollPositions();
+            saveAllData();
+            appData.ui.currentTab = tab;
+            originalSwitchTab(tab);
+
+            // Restore scroll position after switching
+            setTimeout(() => {
+                restoreScrollPosition(`${tab}-section`);
+            }, 150);
+
+            // Update analysis when switching to analysis tab
+            if (tab === 'analysis') {
+                updateAnalysis();
+            }
+        };
+
+        // Save before page unload
+        window.addEventListener('beforeunload', saveAllData);
+
+        // Enter key handler for settings page to return to analysis
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const settingsSection = document.getElementById('settings-section');
+                // Check if we're on the settings page
+                if (!settingsSection.classList.contains('hidden')) {
+                    switchTab('analysis');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
