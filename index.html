@@ -18,8 +18,14 @@
  letter-spacing: 0.03em;
  }
 
+ /* Autosizing base font - scales with viewport width */
+ html {
+ font-size: calc(0.8rem + 0.5vw);
+ }
+
  h1, h2, h3, h4, h5, h6, p, span, div, button, input, label {
  font-family: 'Share Tech Mono', monospace !important; font-weight: 200;
+ white-space: nowrap;
  }
 
  /* LED glow effect for text */
@@ -47,30 +53,44 @@
 
  /* Font size classes - only 3 sizes allowed */
  .font-small {
- font-size: 0.875rem;
+ font-size: 0.75rem;
  }
 
  .font-medium {
- font-size: 1.125rem;
+ font-size: 1.35rem;
  }
 
  .font-large {
- font-size: 1.5rem;
+ font-size: 1.8rem;
  }
+
+ /* Prevent wrapping */
+ body, #main-container, #content-area {
+ white-space: nowrap;
+ }
+
+ /* Allow horizontal overflow */
+ .overflow-y-auto {
+ overflow-x: auto !important;
+ }
+ .hide-scrollbar {
+ overflow-x: auto !important;
+ }
+
  </style>
 </head>
 <body class="bg-black min-h-screen">
  <div id="main-container" class="relative w-full h-screen overflow-hidden">
  <!-- Tab Selector (Hidden by default) -->
- <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
- <div class="flex flex-col gap-4 items-center">
- <button onclick="switchTab('deliveries')" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50 whitespace-nowrap">
+ <div class="flex flex-col gap-4 items-center whitespace-nowrap">
+ <button onclick="switchTab('deliveries')" class="w-64 h-16 bg-black text-white font-medium transition-colors">
  Deliveries
  </button>
- <button onclick="switchTab('analysis')" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ <button onclick="switchTab('analysis')" class="w-64 h-16 bg-black text-white font-medium transition-colors">
  Analysis
  </button>
- <button onclick="openSettingsPopup()" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ <button onclick="openSettingsPopup()" class="w-64 h-16 bg-black text-white font-medium transition-colors">
  Settings
  </button>
  </div>
@@ -78,9 +98,9 @@
 
  <!-- Settings Modal Popup (Hidden by default) -->
  <div id="settings-popup" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
- <div class="bg-black border border-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
- <div class="flex justify-between items-center mb-6">
- <h1 class="font-large text-white">Settings</h1>
+ <div class="bg-black p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto hide-scrollbar whitespace-nowrap">
+ <div class="flex justify-between items-center mb-6 whitespace-nowrap">
+ 
  <button onclick="closeSettingsPopup()" class="text-white font-large hover:text-gray-300">&times;</button>
  </div>
  <div class="space-y-6">
@@ -96,8 +116,8 @@
  class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
  <p class="text-white font-small mt-1">Average earnings per delivery order</p>
  </div>
- <hr class="border-gray-700">
- <h2 class="text-white font-medium ">On the Road Settings</h2>
+ <hr style="border: 0; border-top: 0.5px solid white;">
+ 
  <div>
  <label for="mpg" class="block text-white font-medium mb-2">Vehicle MPG</label>
  <input type="number" id="mpg" step="0.1" min="0" placeholder="Enter your MPG"
@@ -116,21 +136,21 @@
  class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
  <p class="text-white font-small mt-1">The minimum you want to earn per hour</p>
  </div>
- <hr class="border-gray-700">
+ <hr style="border: 0; border-top: 0.5px solid white;">
  <p class="text-white text-center font-small text-gray-400 mt-4">Settings auto-save automatically</p>
  </div>
  </div>
  </div>
 
  <!-- Content Sections -->
- <div id="content-area" class="w-full h-full flex items-center justify-center">
+ <div id="content-area" class="w-full h-full flex items-center justify-center whitespace-nowrap">
  <!-- Deliveries Section -->
- <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
- <h1 class="font-large font-large text-white mb-6">Deliveries</h1>
- <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
- <div class="space-y-6">
+ <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar whitespace-nowrap">
+ 
+ <div class="bg-black p-6 max-w-4xl mx-auto whitespace-nowrap">
+ <div class="space-y-6 whitespace-nowrap">
  <!-- Add Delivery Form -->
- <div class="bg-black/50 border border-white rounded-lg p-6">
+ <div class="bg-black/50 p-6 whitespace-nowrap">
  <h2 class="font-medium text-white mb-4">Add New Delivery</h2>
  <div class="space-y-4">
  <div>
@@ -143,15 +163,17 @@
  <input type="datetime-local" id="delivery-date"
  class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
  </div>
- <button onclick="addDelivery()" class="w-full bg-black border border-white text-white font-medium py-3 px-6 rounded-lg transition-colors">
+ <button onclick="addDelivery()" class="w-full bg-black text-white font-medium py-3 px-6 transition-colors">
  Add Delivery
  </button>
  </div>
  </div>
 
+ <hr style="border: 0; border-top: 0.5px solid white;">
+
  <!-- Delivery List -->
- <div class="bg-black/50 border border-white rounded-lg p-6">
- <div class="flex justify-between items-center mb-4">
+ <div class="bg-black/50 p-6 whitespace-nowrap">
+ <div class="flex justify-between items-center mb-2 whitespace-nowrap">
  <h2 class="font-medium text-white">Delivery History</h2>
  <button onclick="clearAllDeliveries()" class="text-white font-small hover:text-gray-300 underline">
  Clear All
@@ -162,19 +184,21 @@
  </div>
  </div>
 
+ <hr style="border: 0; border-top: 0.5px solid white;">
+
  <!-- Summary Stats -->
- <div class="bg-black/50 border border-white rounded-lg p-6">
- <h2 class="font-medium text-white mb-4">Summary</h2>
- <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
- <div class="text-center">
+ <div class="bg-black/50 p-6 whitespace-nowrap">
+ <h2 class="font-medium text-white mb-4 whitespace-nowrap">Summary</h2>
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-4 whitespace-nowrap">
+ <div class="text-center whitespace-nowrap">
  <p class="text-white font-small">Total Earnings</p>
  <p class="text-white font-large " id="total-earnings">$0.00</p>
  </div>
- <div class="text-center">
+ <div class="text-center whitespace-nowrap">
  <p class="text-white font-small">Total Deliveries</p>
  <p class="text-white font-large " id="total-deliveries">0</p>
  </div>
- <div class="text-center">
+ <div class="text-center whitespace-nowrap">
  <p class="text-white font-small">Average per Delivery</p>
  <p class="text-white font-large " id="avg-delivery">$0.00</p>
  </div>
@@ -185,75 +209,83 @@
  </div>
 
  <!-- Analysis Section -->
- <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
- <h1 class="font-large font-large text-white mb-6">Analysis</h1>
- <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
- <div class="space-y-6">
+ <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar whitespace-nowrap">
+ 
+ <div class="bg-black p-6 max-w-4xl mx-auto whitespace-nowrap">
+ <div class="space-y-6 whitespace-nowrap">
  <!-- Quick Offer Calculator (moved to top - most frequently used) -->
- <div class="bg-black/50 border border-white rounded-lg p-4">
- <div class="flex flex-row gap-24 mb-4 justify-center">
- <div class="flex flex-col items-center">
+ <div class="bg-black/50 p-4 whitespace-nowrap">
+ <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center mb-4 whitespace-nowrap">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Offer ($)</p>
  <p class="text-white font-large cursor-pointer" id="offer-amount-display" data-type="offer-amount" data-step="0.1">$0.00</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Miles</p>
  <p class="text-white font-large cursor-pointer" id="offer-miles-display" data-type="offer-miles" data-step="0.5">0</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Time (min)</p>
  <p class="text-white font-large cursor-pointer" id="offer-minutes-display" data-type="offer-minutes" data-step="1">0</p>
  </div>
  </div>
- <div class="text-center">
+ <div class="text-center whitespace-nowrap">
  <p class="text-white font-small">Result: <span id="offer-result-text" class="">Enter values above</span></p>
  </div>
  </div>
 
- <!-- Parameters & Targets (side by side for compact display) -->
- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <hr style="border: 0; border-top: 0.5px solid white;">
+
+ <!-- Parameters & Targets (stacked vertically) -->
+ <div class="space-y-4 whitespace-nowrap">
  <!-- Parameters -->
- <div class="bg-black/50 border border-white rounded-lg p-4">
- <div class="flex flex-row gap-4 justify-center">
- <div class="flex flex-col items-center">
+ <div class="bg-black/50 p-4 whitespace-nowrap">
+ <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">MPG</p>
  <p class="text-white font-large cursor-pointer" id="mpg-display" data-type="mpg" data-step="1">0</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Gas ($/gal)</p>
  <p class="text-white font-large cursor-pointer" id="gas-price-display" data-type="gas-price" data-step="0.1">$0.00</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Min Hourly ($)</p>
  <p class="text-white font-large cursor-pointer" id="hourly-rate-display" data-type="hourly-rate" data-step="1">$0.00</p>
  </div>
  </div>
  </div>
+ </div>
+
+ <hr style="border: 0; border-top: 0.5px solid white;">
 
  <!-- Targets -->
- <div class="bg-black/50 border border-white rounded-lg p-4">
- <div class="flex flex-row gap-4 justify-center">
- <div class="flex flex-col items-center">
+ <div class="bg-black/50 p-4 whitespace-nowrap">
+ <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400">Daily</p>
  <p class="text-white font-medium " id="daily-target">$0.00</p>
  <p class="text-white font-small" id="daily-orders">0/day</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400">Weekly</p>
  <p class="text-white font-medium " id="weekly-target">$0.00</p>
  <p class="text-white font-small" id="weekly-orders">0/week</p>
  </div>
- <div class="flex flex-col items-center">
+ <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400">Monthly</p>
  <p class="text-white font-medium " id="display-monthly-goal-mini">$0.00</p>
  </div>
  </div>
  </div>
  </div>
+ </div>
+
+ <hr style="border: 0; border-top: 0.5px solid white;">
 
  <!-- Monthly Goal Progress (at bottom - reference only) -->
- <div class="bg-black/50 border border-white rounded-lg p-4">
- <div id="goal-progress-container">
+ <div class="bg-black/50 p-4 whitespace-nowrap">
+ <div id="goal-progress-container whitespace-nowrap">
  <div class="flex justify-between items-center mb-2">
  <span class="text-white font-small">Goal: <span id="display-monthly-goal" class="">$0.00</span></span>
  <span class="text-white font-small">Orders Needed: <span id="orders-needed" class="">0</span></span>
@@ -269,10 +301,10 @@
  </div>
 
  <!-- Default Welcome Screen -->
- <div id="welcome-screen" class="text-center">
- <h1 class="font-large font-large text-white mb-4">Delivery Goals</h1>
+ <div id="welcome-screen" class="text-center whitespace-nowrap">
+ 
  <p class="text-white font-medium md:font-medium mb-8">Double-click anywhere or tap the button to open tabs</p>
- <button id="menu-button" class="bg-black border border-white text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg">
+ <button id="menu-button" class="bg-black text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg">
  Open Menu
  </button>
  </div>
@@ -687,7 +719,7 @@
  const deliveries = appData.deliveries || [];
 
  if (deliveries.length === 0) {
- deliveryList.innerHTML = '<p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>';
+ deliveryList.innerHTML = '<p class="text-white text-center text-gray-400 whitespace-nowrap">No deliveries yet. Add your first delivery above!</p>';
  return;
  }
 
@@ -695,12 +727,12 @@
  const date = new Date(delivery.date);
  const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
  return `
- <div class="bg-black border border-white rounded-lg p-4 flex justify-between items-center">
- <div>
- <p class="text-white ">$${delivery.amount.toFixed(2)}</p>
- <p class="text-white font-small text-gray-400">${formattedDate}</p>
+ <div class="bg-black p-4 flex justify-between items-center whitespace-nowrap">
+ <div class="whitespace-nowrap">
+ <p class="text-white whitespace-nowrap">$${delivery.amount.toFixed(2)}</p>
+ <p class="text-white font-small text-gray-400 whitespace-nowrap">${formattedDate}</p>
  </div>
- <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 font-small">Delete</button>
+ <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 font-small whitespace-nowrap">Delete</button>
  </div>
  `;
  }).join('');
