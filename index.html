@@ -245,8 +245,37 @@
         // Flag to prevent auto-save during initial load
         let isInitialLoad = true;
 
+        // Debug utility - set to false to disable all logging
+        const ENABLE_DEBUG = true;
+
+        // Simple debug logging function
+        function debug(category, action, data = null) {
+            if (ENABLE_DEBUG) {
+                const timestamp = new Date().toLocaleTimeString();
+                if (data !== null) {
+                    console.log(`[${timestamp}] [${category}] ${action}`, data);
+                } else {
+                    console.log(`[${timestamp}] [${category}] ${action}`);
+                }
+            }
+        }
+
+        // Function wrapper for automatic debug logging
+        function debugWrap(fnName, fn) {
+            if (!ENABLE_DEBUG) return fn;
+            return function(...args) {
+                const timestamp = new Date().toLocaleTimeString();
+                console.log(`[${timestamp}] [${fnName}] CALLED with`, args);
+                const result = fn.apply(this, args);
+                console.log(`[${timestamp}] [${fnName}] RETURNED`, result);
+                return result;
+            };
+        }
+
         // Save all app data to localStorage
         function saveAllData() {
+            debug('DATA', 'Saving all data...', { currentTab: appData.ui.currentTab });
+
             const dataToSave = {
                 ...appData,
                 settings: {
@@ -260,7 +289,7 @@
                 }
             };
             localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
-            console.log('All data saved successfully');
+            debug('DATA', 'All data saved successfully', { deliveriesCount: appData.deliveries?.length });
         }
 
         // Save scroll position
@@ -299,6 +328,8 @@
 
         // Load all app data from localStorage
         function loadAllData() {
+            debug('DATA', 'Loading all data...');
+
             const savedData = localStorage.getItem('orderCalcData');
             if (savedData) {
                 try {
@@ -322,15 +353,18 @@
 
                     // Restore previous tab if available, otherwise default to analysis
                     const tabToRestore = parsedData.ui?.currentTab || 'analysis';
+                    debug('UI', 'Restoring tab', { tab: tabToRestore });
                     setTimeout(() => {
                         restoreUIState(tabToRestore);
                     }, 100);
 
-                    console.log('All data loaded successfully');
+                    debug('DATA', 'All data loaded successfully', { tab: tabToRestore, deliveries: appData.deliveries?.length });
                 } catch (e) {
+                    debug('ERROR', 'Error loading data', e);
                     console.error('Error loading data:', e);
                 }
             } else {
+                debug('DATA', 'No saved data found, initializing...');
                 // First time - default to analysis tab
                 setTimeout(() => {
                     restoreUIState('analysis');
@@ -356,6 +390,8 @@
 
         // Save settings to localStorage (legacy function, kept for compatibility)
         function saveSettings() {
+            debug('SETTINGS', 'Save Settings clicked');
+
             // Close tab selector if open to prevent interference
             tabSelector.classList.add('hidden');
 
@@ -370,6 +406,8 @@
             // Update analysis and navigate to analysis page after saving
             updateAnalysis();
 
+            debug('UI', 'Navigating to Analysis page after save...');
+
             // Direct navigation to analysis using base switchTab logic
             setTimeout(() => {
                 document.querySelectorAll('[id$="-section"]').forEach(section => {
@@ -379,6 +417,7 @@
                 document.getElementById('analysis-section').classList.remove('hidden');
                 appData.ui.currentTab = 'analysis';
                 isInitialLoad = false;
+                debug('UI', 'Navigation to Analysis complete');
             }, 600);
         }
 
@@ -442,7 +481,10 @@
             const amount = parseFloat(document.getElementById('delivery-amount').value);
             const dateInput = document.getElementById('delivery-date').value;
 
+            debug('DELIVERY', 'Add delivery attempted', { amount, dateInput });
+
             if (isNaN(amount) || amount <= 0) {
+                debug('DELIVERY', 'Invalid amount provided', { amount });
                 alert('Please enter a valid amount');
                 return;
             }
@@ -456,6 +498,8 @@
 
             appData.deliveries.push(delivery);
             appData.deliveries.sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
+
+            debug('DELIVERY', 'Delivery added successfully', { id: delivery.id, amount, totalDeliveries: appData.deliveries.length });
 
             saveAllData();
             updateDeliveryList();
@@ -560,6 +604,8 @@
         });
 
         function switchTab(tab) {
+            debug('UI', 'Switching to tab', { tab, currentTab: appData.ui.currentTab });
+
             // Hide all sections
             document.querySelectorAll('[id$="-section"]').forEach(section => {
                 section.classList.add('hidden');
@@ -578,6 +624,8 @@
             if (tab === 'settings') {
                 loadSettings();
             }
+
+            debug('UI', 'Tab switch complete', { newTab: tab });
         }
 
         // Load settings on page load
