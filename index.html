@@ -51,17 +51,7 @@
  scrollbar-width: none;
  }
 
- /* Pull-to-refresh indicator styles */
- #pull-to-refresh {
- transform: translateY(-100%);
- transition: transform 0.2s ease-out;
- }
- #pull-to-refresh.showing {
- transform: translateY(-50px);
- }
- #pull-to-refresh.refreshing {
- transform: translateY(0);
- }
+ 
 
  /* Font size classes - only 3 sizes allowed */
  .font-small {
@@ -136,10 +126,6 @@
 </head>
 <body class="bg-black min-h-screen">
  <div id="main-container" class="relative w-full h-screen overflow-hidden">
- <!-- Pull-to-refresh indicator -->
- <div id="pull-to-refresh" class="absolute top-0 left-0 right-0 flex justify-center items-center h-24 z-50 overflow-hidden pointer-events-none">
- <div class="text-white font-small text-center whitespace-nowrap">Pull down to clear cache & refresh</div>
- </div>
  <!-- Tab Selector (Hidden by default) -->
  <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50 whitespace-nowrap">
  <div class="flex flex-col gap-4 items-center whitespace-nowrap">
@@ -1146,20 +1132,17 @@
 
  // Open DoorDash app
  function openDoorDash() {
- window.location.href = 'dasher://';
- console.log('Opening DoorDash app');
+ window.location.href = 'itms-apps://apps.apple.com/app/id1451754591';
  }
 
  // Open Shipt app
  function openShipt() {
- window.location.href = 'shopper://';
- console.log('Opening Shipt app');
+ window.location.href = 'itms-apps://apps.apple.com/app/id976353472';
  }
 
  // Open Uber Eats app
  function openUberEats() {
- window.location.href = 'uberdriver://';
- console.log('Opening Uber Eats app');
+ window.location.href = 'itms-apps://apps.apple.com/app/id366468802';
  }
 
  // Toggle additional settings dropdown
@@ -1296,8 +1279,6 @@
  let isRefreshing = false;
  const PULL_THRESHOLD = 100; // pixels to pull down to trigger refresh
 
- const pullToRefreshIndicator = document.getElementById('pull-to-refresh');
-
  function handleTouchStart(e) {
  if (isRefreshing) return;
  if (e.touches.length === 1 && window.scrollY === 0) {
@@ -1308,16 +1289,8 @@
 
  function handleTouchMove(e) {
  if (!isPulling || isRefreshing) return;
-
  pullCurrentY = e.touches[0].clientY;
  pullDistance = pullCurrentY - pullStartY;
-
- // Only show indicator if pulling down from top
- if (pullDistance > 0) {
- const clampedDistance = Math.min(pullDistance, 200);
- pullToRefreshIndicator.style.transform = `translateY(${clampedDistance - 100}px)`;
- pullToRefreshIndicator.classList.add('showing');
- }
  }
 
  function handleTouchEnd(e) {
@@ -1325,11 +1298,8 @@
  isPulling = false;
 
  if (pullDistance >= PULL_THRESHOLD) {
- // Trigger refresh
+ // Trigger refresh silently
  isRefreshing = true;
- pullToRefreshIndicator.classList.add('refreshing');
- pullToRefreshIndicator.querySelector('div').textContent = 'Clearing cache...';
-
  setTimeout(() => {
  // Clear all localStorage
  localStorage.clear();
@@ -1337,11 +1307,7 @@
 
  // Hard refresh the page
  location.reload(true);
- }, 500);
- } else {
- // Reset indicator
- pullToRefreshIndicator.classList.remove('showing');
- pullToRefreshIndicator.style.transform = 'translateY(-100%)';
+ }, 100);
  }
  pullDistance = 0;
  }
