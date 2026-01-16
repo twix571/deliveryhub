@@ -176,7 +176,7 @@
  <div class="space-y-6">
  <div>
  <label for="monthly-goal" class="block text-white font-medium mb-2">Monthly Goal ($)</label>
- <input type="number" id="monthly-goal" step="0.01" min="0" placeholder="Enter your monthly goal"
+ <input type="number" id="monthly-goal" step="0.01" min="0" placeholder=""
  class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
  <p class="text-white font-small mt-1">Target earnings for the month</p>
  </div>
@@ -402,7 +402,7 @@
  <div class="w-full bg-gray-700 rounded-full h-3 mb-3">
  <div id="progress-bar" class="bg-white h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
  </div>
- <p id="progress-message" class="text-white text-center font-small">Enter your monthly goal in settings to see progress</p>
+ <p id="progress-message" class="text-white text-center font-small">in settings to see progress</p>
  </div>
  </div>
 
@@ -793,7 +793,7 @@
  document.getElementById('weekly-target').textContent = '$0.00';
  document.getElementById('weekly-orders').textContent = '0/week';
  document.getElementById('progress-bar').style.width = '0%';
- document.getElementById('progress-message').textContent = 'Enter your monthly goal and average per order in settings to see calculated targets.';
+ document.getElementById('progress-message').textContent = '';
  }
 
  // Update quick offer display
