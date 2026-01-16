@@ -239,30 +239,40 @@
  
  <div class="bg-black p-6 max-w-4xl mx-auto whitespace-nowrap">
  <div class="space-y-6 whitespace-nowrap">
- <!-- Add Delivery Form -->
- <div class="bg-black/50 p-6 whitespace-nowrap">
- <h2 class="font-medium text-white mb-4">Add New Delivery</h2>
- <div class="space-y-4">
- <div>
- <label for="delivery-amount" class="block text-white font-medium mb-2">Earnings ($)</label>
- <input type="number" id="delivery-amount" step="0.01" min="0" placeholder="Enter delivery earnings"
- class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <!-- Add Delivery Form Toggle -->
+ <button onclick="toggleDeliveryForm()" class="w-full bg-black text-white font-medium py-2 px-4 border border-white rounded-lg transition-colors hover:bg-white/10">
+ <span id="delivery-form-toggle-text">Add Delivery</span> <span id="delivery-form-arrow">▼</span>
+ </button>
+
+ <!-- Add Delivery Form (compact like analytics with drag gestures) -->
+ <div id="delivery-form-container" class="hidden bg-black/50 p-4 whitespace-nowrap">
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap mb-4">
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Earnings ($)</p>
+ <p class="text-white font-large cursor-pointer" id="delivery-amount-display" data-type="delivery-amount" data-step="0.01">$5.00</p>
  </div>
- <div>
- <label for="delivery-date" class="block text-white font-medium mb-2">Date & Time</label>
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Miles</p>
+ <p class="text-white font-large cursor-pointer" id="delivery-miles-display" data-type="delivery-miles" data-step="0.01">0</p>
+ </div>
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Date & Time</p>
  <input type="datetime-local" id="delivery-date"
- class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ class="w-full px-2 py-3 bg-black border border-white text-white font-medium text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent text-sm">
  </div>
- <button onclick="addDelivery()" class="w-full bg-black text-white font-medium py-3 px-6 transition-colors">
+ </div>
+ <div class="flex justify-center whitespace-nowrap mb-4">
+ <button onclick="addDelivery()" class="bg-black text-white font-medium py-2 px-8 border border-white rounded-lg transition-colors hover:bg-white/10">
  Add Delivery
  </button>
  </div>
+ <p class="text-white text-center font-small text-gray-400 whitespace-nowrap">Drag on values to adjust</p>
  </div>
 
  <hr style="border: 0; border-top: 0.5px solid white;">
 
- <!-- Delivery List -->
- <div class="bg-black/50 p-6 whitespace-nowrap">
+ <!-- Delivery List (compact like analytics) -->
+ <div class="bg-black/50 p-4 whitespace-nowrap">
  <div class="flex justify-between items-center mb-2 whitespace-nowrap">
  <h2 class="font-medium text-white">Delivery History</h2>
  <button onclick="clearAllDeliveries()" class="text-white font-small hover:text-gray-300 underline">
@@ -270,27 +280,26 @@
  </button>
  </div>
  <div id="delivery-list" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
- <p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>
+ <p class="text-white text-center text-gray-400 whitespace-nowrap">No deliveries yet. Add your first delivery above!</p>
  </div>
  </div>
 
  <hr style="border: 0; border-top: 0.5px solid white;">
 
- <!-- Summary Stats -->
- <div class="bg-black/50 p-6 whitespace-nowrap">
- <h2 class="font-medium text-white mb-4 whitespace-nowrap">Summary</h2>
- <div class="grid grid-cols-1 md:grid-cols-3 gap-4 whitespace-nowrap">
- <div class="text-center whitespace-nowrap">
- <p class="text-white font-small">Total Earnings</p>
- <p class="text-white font-large " id="total-earnings">$0.00</p>
+ <!-- Summary Stats (compact like analytics) -->
+ <div class="bg-black/50 p-4 whitespace-nowrap">
+ <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap">
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Total Earnings</p>
+ <p class="text-white font-medium " id="total-earnings">$0.00</p>
  </div>
- <div class="text-center whitespace-nowrap">
- <p class="text-white font-small">Total Deliveries</p>
- <p class="text-white font-large " id="total-deliveries">0</p>
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Total Deliveries</p>
+ <p class="text-white font-medium " id="total-deliveries">0</p>
  </div>
- <div class="text-center whitespace-nowrap">
- <p class="text-white font-small">Average per Delivery</p>
- <p class="text-white font-large " id="avg-delivery">$0.00</p>
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-small text-gray-400 mb-1">Average</p>
+ <p class="text-white font-medium " id="avg-delivery">$0.00</p>
  </div>
  </div>
  </div>
@@ -499,6 +508,10 @@
  miles: 0,
  minutes: 0,
  },
+ deliveryForm: {
+ amount: 5,
+ miles: 0,
+ },
  ui: {
  currentTab: '',
  lastVisited: Date.now()
@@ -706,6 +719,17 @@
  }
  updateQuickOfferDisplay();
 
+ // Delivery form values (stored if available)
+ if (parsedData.deliveryForm) {
+ appData.deliveryForm = parsedData.deliveryForm;
+ } else {
+ appData.deliveryForm = {
+ amount: 5,
+ miles: 0,
+ };
+ }
+ updateDeliveryFormDisplay();
+
  // Restore previous tab if available, otherwise default to analysis
  const tabToRestore = parsedData.ui?.currentTab || 'analysis';
  debug('UI', 'Restoring tab', { tab: tabToRestore });
@@ -832,10 +856,11 @@
 
  // Add a new delivery
  function addDelivery() {
- const amount = parseFloat(document.getElementById('delivery-amount').value);
+ const amount = appData.deliveryForm?.amount || 0;
+ const miles = appData.deliveryForm?.miles || 0;
  const dateInput = document.getElementById('delivery-date').value;
 
- debug('DELIVERY', 'Add delivery attempted', { amount, dateInput });
+ debug('DELIVERY', 'Add delivery attempted', { amount, miles, dateInput });
 
  if (isNaN(amount) || amount <= 0) {
  debug('DELIVERY', 'Invalid amount provided', { amount });
@@ -846,6 +871,7 @@
  const delivery = {
  id: Date.now(),
  amount: amount,
+ miles: miles,
  date: dateInput || new Date().toISOString().slice(0, 16),
  timestamp: Date.now()
  };
@@ -853,16 +879,17 @@
  appData.deliveries.push(delivery);
  appData.deliveries.sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
 
- debug('DELIVERY', 'Delivery added successfully', { id: delivery.id, amount, totalDeliveries: appData.deliveries.length });
+ debug('DELIVERY', 'Delivery added successfully', { id: delivery.id, amount, miles, totalDeliveries: appData.deliveries.length });
 
  saveAllData();
  updateDeliveryList();
  updateDeliveryStats();
  updateAnalysis(); // Update analysis with new delivery data
 
- // Clear form
- document.getElementById('delivery-amount').value = '';
- document.getElementById('delivery-date').value = '';
+ // Reset form to defaults (but don't reset date for convenience)
+ appData.deliveryForm.amount = 5;
+ appData.deliveryForm.miles = 0;
+ updateDeliveryFormDisplay();
  }
 
  // Clear all deliveries
@@ -889,11 +916,12 @@
  deliveryList.innerHTML = deliveries.map(delivery => {
  const date = new Date(delivery.date);
  const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+ const milesText = delivery.miles > 0 ? `${delivery.miles.toFixed(2)} mi` : '';
  return `
- <div class="bg-black p-4 flex justify-between items-center whitespace-nowrap">
- <div class="whitespace-nowrap">
- <p class="text-white whitespace-nowrap">$${delivery.amount.toFixed(2)}</p>
- <p class="text-white font-small text-gray-400 whitespace-nowrap">${formattedDate}</p>
+ <div class="bg-black border border-white p-4 flex justify-between items-center whitespace-nowrap">
+ <div class="flex flex-col items-center whitespace-nowrap">
+ <p class="text-white font-medium whitespace-nowrap">$${delivery.amount.toFixed(2)}</p>
+ <p class="text-white font-small text-gray-400 whitespace-nowrap">${formattedDate}${milesText ? ' • ' + milesText : ''}</p>
  </div>
  <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 font-small whitespace-nowrap">Delete</button>
  </div>
@@ -932,6 +960,24 @@
  let currentDrag = null;
  let momentumInterval = null;
 
+ // Calculate speed multiplier based on vertical offset
+ // Higher (negative Y) = faster, Lower (positive Y) = slower
+ function calculateSpeedMultiplier(deltaY) {
+ const maxOffset = 150; // Maximum vertical offset for maximum speed change
+
+ // Normalize offset to -1 to 1 range
+ const normalizedOffset = Math.max(-1, Math.min(1, deltaY / maxOffset));
+
+ // Range: 0.1x (at bottom) to 10x (at top), with 1x in center
+ if (normalizedOffset < 0) {
+ // Dragging higher (up) - increase speed
+ return 1 + Math.abs(normalizedOffset) * 9;
+ } else {
+ // Dragging lower (down) - decrease speed
+ return 1 - (normalizedOffset) * 0.9;
+ }
+ }
+
  function setupDragGestures() {
  const dragElements = document.querySelectorAll('[data-type]');
 
@@ -967,6 +1013,7 @@
  if (!currentDrag) return;
 
  const clientX = e.clientX || e.touches[0].clientX;
+ const clientY = e.clientY || e.touches[0].clientY;
  const currentTime = Date.now();
  const deltaTime = currentTime - currentDrag.lastTime;
 
@@ -989,15 +1036,20 @@
  currentDrag.lastTime = currentTime;
  }
 
+ // Calculate vertical offset for speed control
+ const deltaY = clientY - currentDrag.startY;
+ const speedMultiplier = calculateSpeedMultiplier(deltaY);
+
  const deltaX = clientX - currentDrag.startX;
 
  const pixelsPerStep = 2;
- const steps = Math.round(deltaX / pixelsPerStep);
+ const steps = Math.round(deltaX / (pixelsPerStep / speedMultiplier));
  const newValue = Math.max(0, currentDrag.startValue + (steps * currentDrag.step));
 
  setValueByType(currentDrag.type, newValue);
 
  currentDrag.prevX = clientX;
+ currentDrag.speedMultiplier = speedMultiplier;
  e.preventDefault();
  };
 
@@ -1010,12 +1062,21 @@
  avgVelocity = currentDrag.velocities.reduce((sum, v) => sum + v, 0) / currentDrag.velocities.length;
  }
 
- // Apply momentum if there's significant velocity
- if (currentDrag.velocities && currentDrag.velocities.length > 0) {
+ // Get the speed multiplier from the drag
+ const speedMultiplier = currentDrag.speedMultiplier || 1;
+
+ // Only apply momentum if there was significant recent movement
+ // Check if the last velocity was above threshold (user was actually moving)
+ const hasRecentMovement = currentDrag.velocities &&
+                             currentDrag.velocities.length > 0 &&
+                             Math.abs(currentDrag.velocities[currentDrag.velocities.length - 1]) > 0.05;
+
+ // Apply momentum if there's significant velocity AND recent movement
+ if (currentDrag.velocities && currentDrag.velocities.length > 0 && hasRecentMovement) {
  const dragStep = currentDrag.step; // Capture before clearing currentDrag
  const dragType = currentDrag.type;
  let momentumValue = getValueByType(dragType);
- let momentumVelocity = avgVelocity * 12; // Maximum boost
+ let momentumVelocity = avgVelocity * 12 * speedMultiplier; // Apply speed multiplier to momentum
  const friction = 0.98; // Very slow deceleration
  const minVelocity = 0.01; // Ultra low stop threshold
 
@@ -1058,6 +1119,9 @@
  if (type.startsWith('offer')) {
  const key = type.replace('offer-', '');
  return appData.quickOffer?.[key] || 0;
+ } else if (type.startsWith('delivery')) {
+ const key = type.replace('delivery-', '');
+ return appData.deliveryForm?.[key] || 0;
  } else {
  return parseFloat(document.getElementById(type)?.value) || 0;
  }
@@ -1067,15 +1131,63 @@
  if (type.startsWith('offer')) {
  const key = type.replace('offer-', '');
  appData.quickOffer[key] = value;
+ updateQuickOfferDisplay();
+ } else if (type.startsWith('delivery')) {
+ const key = type.replace('delivery-', '');
+ appData.deliveryForm[key] = value;
+ updateDeliveryFormDisplay();
+ saveAllData();
  } else {
  const el = document.getElementById(type);
  if (el) el.value = value;
  }
- updateQuickOfferDisplay();
  }
 
  function openTabSelector() {
  tabSelector.classList.remove('hidden');
+ }
+
+ // Toggle delivery form visibility
+ function toggleDeliveryForm() {
+ const form = document.getElementById('delivery-form-container');
+ const arrow = document.getElementById('delivery-form-arrow');
+ form.classList.toggle('hidden');
+ arrow.classList.toggle('rotate-180');
+ }
+
+ // Update delivery form display
+ function updateDeliveryFormDisplay() {
+ if (!appData.deliveryForm) {
+ appData.deliveryForm = { amount: 5, miles: 0 };
+ }
+ const amountEl = document.getElementById('delivery-amount-display');
+ const milesEl = document.getElementById('delivery-miles-display');
+ if (amountEl) {
+ amountEl.textContent = `$${appData.deliveryForm.amount.toFixed(2)}`;
+ }
+ if (milesEl) {
+ milesEl.textContent = appData.deliveryForm.miles.toFixed(2);
+ }
+ }
+
+ // Initialize delivery form with default values
+ function initializeDeliveryForm() {
+ if (!appData.deliveryForm) {
+ appData.deliveryForm = { amount: 5, miles: 0 };
+ }
+ updateDeliveryFormDisplay();
+
+ // Set date to today's date
+ const dateInput = document.getElementById('delivery-date');
+ if (dateInput && !dateInput.value) {
+ const now = new Date();
+ const year = now.getFullYear();
+ const month = String(now.getMonth() + 1).padStart(2, '0');
+ const day = String(now.getDate()).padStart(2, '0');
+ const hours = String(now.getHours()).padStart(2, '0');
+ const minutes = String(now.getMinutes()).padStart(2, '0');
+ dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+ }
  }
 
  // Right-click handler
@@ -1231,6 +1343,9 @@
 
  // Load settings on page load
  loadAllData();
+
+ // Initialize delivery form with default values
+ initializeDeliveryForm();
 
  // Setup drag gestures for quick value adjustment
  setupDragGestures();
