@@ -1,731 +1,961 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Goals</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" sizes="192x192" href="icon-192.svg">
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.svg">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Delivery Goals</title>
+ <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+ <meta http-equiv="Pragma" content="no-cache">
+ <meta http-equiv="Expires" content="0">
+ <link rel="manifest" href="manifest.json">
+ <link rel="icon" type="image/svg+xml" sizes="192x192" href="icon-192.svg">
+ <link rel="apple-touch-icon" sizes="192x192" href="icon-192.svg">
+ <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <style>
+ html, body, * {
+ font-family: 'Share Tech Mono', monospace !important; font-weight: 200;
+ letter-spacing: 0.03em;
+ }
 
-        /* Hide scrollbar but allow scrolling */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+ h1, h2, h3, h4, h5, h6, p, span, div, button, input, label {
+ font-family: 'Share Tech Mono', monospace !important; font-weight: 200;
+ }
+
+ /* LED glow effect for text */
+ .font-large,
+ [id*="display"], [id*="target"], [id*="result"], [id*="offer-"] {
+ text-shadow: 0 0 3px rgba(255,255,255,0.3);
+ }
+
+ * { font-weight: 200 !important; }
+ * {
+ -webkit-user-select: none;
+ -moz-user-select: none;
+ -ms-user-select: none;
+ user-select: none;
+ }
+
+ /* Hide scrollbar but allow scrolling */
+ .hide-scrollbar::-webkit-scrollbar {
+ display: none;
+ }
+ .hide-scrollbar {
+ -ms-overflow-style: none;
+ scrollbar-width: none;
+ }
+
+ /* Font size classes - only 3 sizes allowed */
+ .font-small {
+ font-size: 0.875rem;
+ }
+
+ .font-medium {
+ font-size: 1.125rem;
+ }
+
+ .font-large {
+ font-size: 1.5rem;
+ }
+ </style>
 </head>
 <body class="bg-black min-h-screen">
-    <div id="main-container" class="relative w-full h-screen overflow-hidden">
-        <!-- Tab Selector (Hidden by default) -->
-        <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div class="flex flex-col gap-4 items-center">
-                <button onclick="switchTab('deliveries')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
-                    Deliveries
-                </button>
-                <button onclick="switchTab('analysis')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
-                    Analysis
-                </button>
-                <button onclick="switchTab('settings')" class="w-64 h-16 bg-black border border-white text-white text-xl font-semibold rounded-lg transition-colors">
-                    Settings
-                </button>
-            </div>
-        </div>
-
-        <!-- Content Sections -->
-        <div id="content-area" class="w-full h-full flex items-center justify-center">
-            <!-- Deliveries Section -->
-            <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Deliveries</h1>
-                <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
-                    <div class="space-y-6">
-                        <!-- Add Delivery Form -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <h2 class="text-xl font-bold text-white mb-4">Add New Delivery</h2>
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="delivery-amount" class="block text-white text-lg font-medium mb-2">Earnings ($)</label>
-                                    <input type="number" id="delivery-amount" step="0.01" min="0" placeholder="Enter delivery earnings"
-                                        class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
-                                </div>
-                                <div>
-                                    <label for="delivery-date" class="block text-white text-lg font-medium mb-2">Date & Time</label>
-                                    <input type="datetime-local" id="delivery-date"
-                                        class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
-                                </div>
-                                <button onclick="addDelivery()" class="w-full bg-black border border-white text-white text-lg font-semibold py-3 px-6 rounded-lg transition-colors">
-                                    Add Delivery
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Delivery List -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-bold text-white">Delivery History</h2>
-                                <button onclick="clearAllDeliveries()" class="text-white text-sm hover:text-gray-300 underline">
-                                    Clear All
-                                </button>
-                            </div>
-                            <div id="delivery-list" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
-                                <p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>
-                            </div>
-                        </div>
-
-                        <!-- Summary Stats -->
-                        <div class="bg-black/50 border border-white rounded-lg p-6">
-                            <h2 class="text-xl font-bold text-white mb-4">Summary</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="text-center">
-                                    <p class="text-white text-sm">Total Earnings</p>
-                                    <p class="text-white text-2xl font-bold" id="total-earnings">$0.00</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-white text-sm">Total Deliveries</p>
-                                    <p class="text-white text-2xl font-bold" id="total-deliveries">0</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-white text-sm">Average per Delivery</p>
-                                    <p class="text-white text-2xl font-bold" id="avg-delivery">$0.00</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analysis Section -->
-            <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Analysis</h1>
-                <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
-                    <div class="space-y-6">
-                        <!-- Monthly Goal Status -->
-                        <div class="bg-black/50 border border-white rounded-lg p-4">
-                            <h2 class="text-xl font-bold text-white mb-3">Monthly Goal Progress</h2>
-                            <div id="goal-progress-container">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-white text-sm">Goal: <span id="display-monthly-goal" class="font-bold">$0.00</span></span>
-                                    <span class="text-white text-sm">Orders Needed: <span id="orders-needed" class="font-bold">0</span></span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-3 mb-3">
-                                    <div id="progress-bar" class="bg-white h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
-                                </div>
-                                <p id="progress-message" class="text-white text-center text-sm">Enter your monthly goal in settings to see progress</p>
-                            </div>
-                        </div>
-
-                        <!-- Targets (All in one card) -->
-                        <div class="bg-black/50 border border-white rounded-lg p-4">
-                            <h3 class="text-lg font-bold text-white mb-3">Targets</h3>
-                            <div class="grid grid-cols-3 gap-4 text-center">
-                                <div>
-                                    <p class="text-white text-xs text-gray-400">Daily</p>
-                                    <p class="text-white text-xl font-bold" id="daily-target">$0.00</p>
-                                    <p class="text-white text-xs" id="daily-orders">0/day</p>
-                                </div>
-                                <div>
-                                    <p class="text-white text-xs text-gray-400">Weekly</p>
-                                    <p class="text-white text-xl font-bold" id="weekly-target">$0.00</p>
-                                    <p class="text-white text-xs" id="weekly-orders">0/week</p>
-                                </div>
-                                <div>
-                                    <p class="text-white text-xs text-gray-400">Monthly</p>
-                                    <p class="text-white text-xl font-bold" id="display-monthly-goal-mini">$0.00</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stats Summary (Average + Calculation Summary combined) -->
-                        <div class="bg-black/50 border border-white rounded-lg p-4">
-                            <h3 class="text-lg font-bold text-white mb-3">Summary</h3>
-                            <div class="flex justify-between items-center mb-3">
-                                <div>
-                                    <p class="text-white text-xs text-gray-400">Average Per Order</p>
-                                    <p class="text-white text-2xl font-bold" id="display-avg-per-order">$0.00</p>
-                                </div>
-                            </div>
-                            <div class="space-y-1 text-white text-sm" id="calculation-summary">
-                                <p>Enter your monthly goal and average per order in settings to see calculated targets.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Section -->
-            <div id="settings-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Settings</h1>
-                <div class="bg-black border border-white rounded-lg p-6 max-w-2xl">
-                    <div class="space-y-6">
-                        <div>
-                            <label for="monthly-goal" class="block text-white text-lg font-medium mb-2">Monthly Goal ($)</label>
-                            <input type="number" id="monthly-goal" step="0.01" min="0" placeholder="Enter your monthly goal"
-                                class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
-                            <p class="text-white text-sm mt-1">Target earnings for the month</p>
-                        </div>
-                        <div>
-                            <label for="avg-per-order" class="block text-white text-lg font-medium mb-2">Average $ per Delivery Order</label>
-                            <input type="number" id="avg-per-order" step="0.01" min="0" placeholder="Enter average per order"
-                                class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
-                            <p class="text-white text-sm mt-1">Average earnings per delivery order</p>
-                        </div>
-                        <button onclick="saveSettings()" class="w-full bg-black border border-white text-white text-lg font-semibold py-3 px-6 rounded-lg transition-colors">
-                            Save Settings
-                        </button>
-                        <p id="save-message" class="text-white text-center hidden">Settings saved successfully!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Default Welcome Screen -->
-            <div id="welcome-screen" class="text-center">
-                <h1 class="text-3xl md:text-5xl font-bold text-white mb-4">Delivery Goals</h1>
-                <p class="text-white text-lg md:text-xl mb-8">Double-click anywhere or tap the button to open tabs</p>
-                <button id="menu-button" class="bg-black border border-white text-white text-lg font-semibold py-3 px-8 rounded-lg transition-colors shadow-lg">
-                    Open Menu
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(() => {
-                console.log('Service Worker registered');
-            }).catch(err => {
-                console.log('Service Worker registration failed', err);
-            });
-        }
-
-        const tabSelector = document.getElementById('tab-selector');
-        const contentArea = document.getElementById('content-area');
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const mainContainer = document.getElementById('main-container');
-        const menuButton = document.getElementById('menu-button');
-
-        // Debounce function to prevent excessive saves
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Comprehensive app data structure
-        let appData = {
-            settings: {
-                monthlyGoal: '',
-                avgPerOrder: ''
-            },
-            deliveries: [],
-            analysis: {
-                totalEarnings: 0,
-                totalDeliveries: 0,
-                averagePerDelivery: 0
-            },
-            ui: {
-                currentTab: '',
-                lastVisited: Date.now()
-            }
-        };
-
-        // Flag to prevent auto-save during initial load
-        let isInitialLoad = true;
-
-        // Debug utility - set to false to disable all logging
-        const ENABLE_DEBUG = false;
-
-        // Simple debug logging function
-        function debug(category, action, data = null) {
-            if (ENABLE_DEBUG) {
-                const timestamp = new Date().toLocaleTimeString();
-                if (data !== null) {
-                    console.log(`[${timestamp}] [${category}] ${action}`, data);
-                } else {
-                    console.log(`[${timestamp}] [${category}] ${action}`);
-                }
-            }
-        }
-
-        // Function wrapper for automatic debug logging
-        function debugWrap(fnName, fn) {
-            if (!ENABLE_DEBUG) return fn;
-            return function(...args) {
-                const timestamp = new Date().toLocaleTimeString();
-                console.log(`[${timestamp}] [${fnName}] CALLED with`, args);
-                const result = fn.apply(this, args);
-                console.log(`[${timestamp}] [${fnName}] RETURNED`, result);
-                return result;
-            };
-        }
-
-        // Save all app data to localStorage
-        function saveAllData() {
-            debug('DATA', 'Saving all data...', { currentTab: appData.ui.currentTab });
-
-            const monthlyGoalEl = document.getElementById('monthly-goal');
-            const avgPerOrderEl = document.getElementById('avg-per-order');
-            const monthlyGoalValue = monthlyGoalEl?.value || '';
-            const avgPerOrderValue = avgPerOrderEl?.value || '';
-
-            debug('DATA', 'Input values to save', { monthlyGoal: monthlyGoalValue, avgPerOrder: avgPerOrderValue });
-
-            const dataToSave = {
-                ...appData,
-                settings: {
-                    monthlyGoal: monthlyGoalValue,
-                    avgPerOrder: avgPerOrderValue
-                },
-                ui: {
-                    ...appData.ui,
-                    currentTab: getCurrentActiveTab(),
-                    lastVisited: Date.now()
-                }
-            };
-
-            try {
-                localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
-                const savedData = localStorage.getItem('orderCalcData');
-                const parsedSavedData = JSON.parse(savedData);
-                debug('DATA', 'All data saved successfully', {
-                    deliveriesCount: appData.deliveries?.length,
-                    settings: parsedSavedData?.settings
-                });
-            } catch (e) {
-                debug('ERROR', 'Failed to save data to localStorage', e);
-                console.error('localStorage error:', e);
-            }
-        }
-
-        // Save scroll position
-        function saveScrollPositions() {
-            const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
-            sections.forEach(sectionId => {
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
-                }
-            });
-        }
-
-        // Restore scroll position for a specific section
-        function restoreScrollPosition(sectionId) {
-            const savedScroll = localStorage.getItem(`scroll_${sectionId}`);
-            if (savedScroll !== null) {
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    section.scrollTop = parseInt(savedScroll, 10);
-                }
-            }
-        }
-
-        // Get currently active tab
-        function getCurrentActiveTab() {
-            const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
-            for (const sectionId of sections) {
-                const section = document.getElementById(sectionId);
-                if (section && !section.classList.contains('hidden')) {
-                    return sectionId.replace('-section', '');
-                }
-            }
-            return '';
-        }
-
-        // Load all app data from localStorage
-        function loadAllData() {
-            debug('DATA', 'Loading all data...');
-
-            const savedData = localStorage.getItem('orderCalcData');
-            debug('DATA', 'localStorage data found', { hasData: !!savedData, length: savedData?.length });
-
-            if (savedData) {
-                try {
-                    const parsedData = JSON.parse(savedData);
-                    debug('DATA', 'Parsed data', { settings: parsedData?.settings, ui: parsedData?.ui });
-                    appData = parsedData;
-
-                    // Restore settings
-                    if (parsedData.settings?.monthlyGoal !== undefined) {
-                        document.getElementById('monthly-goal').value = parsedData.settings.monthlyGoal;
-                        debug('DATA', 'Restored monthly goal', { value: parsedData.settings.monthlyGoal });
-                    }
-                    if (parsedData.settings?.avgPerOrder !== undefined) {
-                        document.getElementById('avg-per-order').value = parsedData.settings.avgPerOrder;
-                        debug('DATA', 'Restored average per order', { value: parsedData.settings.avgPerOrder });
-                    }
-
-                    // Restore delivery data
-                    if (!appData.deliveries) {
-                        appData.deliveries = [];
-                    }
-                    updateDeliveryList();
-                    updateDeliveryStats();
-
-                    // Update analysis display with restored settings
-                    updateAnalysis();
-
-                    // Restore previous tab if available, otherwise default to analysis
-                    const tabToRestore = parsedData.ui?.currentTab || 'analysis';
-                    debug('UI', 'Restoring tab', { tab: tabToRestore });
-                    setTimeout(() => {
-                        restoreUIState(tabToRestore);
-                    }, 100);
-
-                    debug('DATA', 'All data loaded successfully', { tab: tabToRestore, deliveries: appData.deliveries?.length });
-                } catch (e) {
-                    debug('ERROR', 'Error loading data', e);
-                    console.error('Error loading data:', e);
-                }
-            } else {
-                debug('DATA', 'No saved data found, initializing...');
-                // First time - default to analysis tab
-                setTimeout(() => {
-                    restoreUIState('analysis');
-                }, 100);
-            }
-        }
-
-        // Restore UI state (tab and scroll position)
-        function restoreUIState(tab) {
-            if (tab && document.getElementById(`${tab}-section`)) {
-                // Show the tab without triggering any load/save
-                document.querySelectorAll('[id$="-section"]').forEach(section => {
-                    section.classList.add('hidden');
-                });
-                welcomeScreen.classList.add('hidden');
-                document.getElementById(`${tab}-section`).classList.remove('hidden');
-
-                // Restore scroll position after tab is visible
-                setTimeout(() => {
-                    restoreScrollPosition(`${tab}-section`);
-                }, 150);
-            }
-        }
-
-        // Load settings from localStorage (legacy function, kept for compatibility)
-        function loadSettings() {
-            loadAllData();
-        }
-
-        // Save settings to localStorage (legacy function, kept for compatibility)
-        function saveSettings() {
-            debug('SETTINGS', 'Save Settings clicked');
-
-            // Close tab selector if open to prevent interference
-            tabSelector.classList.add('hidden');
-
-            saveAllData();
-
-            const saveMessage = document.getElementById('save-message');
-            saveMessage.classList.remove('hidden');
-            setTimeout(() => {
-                saveMessage.classList.add('hidden');
-            }, 2000);
-
-            // Update analysis and navigate to analysis page after saving
-            updateAnalysis();
-
-            debug('UI', 'Navigating to Analysis page after save...');
-
-            // Direct navigation to analysis using base switchTab logic
-            setTimeout(() => {
-                document.querySelectorAll('[id$="-section"]').forEach(section => {
-                    section.classList.add('hidden');
-                });
-                welcomeScreen.classList.add('hidden');
-                document.getElementById('analysis-section').classList.remove('hidden');
-                appData.ui.currentTab = 'analysis';
-                isInitialLoad = false;
-                debug('UI', 'Navigation to Analysis complete');
-            }, 600);
-        }
-
-        // Calculate and update analysis page
-        function updateAnalysis() {
-            const monthlyGoal = parseFloat(document.getElementById('monthly-goal')?.value) || 0;
-            const avgPerOrder = parseFloat(document.getElementById('avg-per-order')?.value) || 0;
-
-            // Update display values
-            document.getElementById('display-monthly-goal').textContent = `$${monthlyGoal.toFixed(2)}`;
-            document.getElementById('display-monthly-goal-mini').textContent = `$${monthlyGoal.toFixed(2)}`;
-            document.getElementById('display-avg-per-order').textContent = `$${avgPerOrder.toFixed(2)}`;
-
-            if (monthlyGoal > 0 && avgPerOrder > 0) {
-                // Calculate orders needed
-                const ordersNeeded = Math.ceil(monthlyGoal / avgPerOrder);
-                document.getElementById('orders-needed').textContent = ordersNeeded;
-
-                // Calculate daily target (assuming 30 days per month)
-                const dailyTarget = monthlyGoal / 30;
-                document.getElementById('daily-target').textContent = `$${dailyTarget.toFixed(2)}`;
-                const dailyOrders = Math.ceil(dailyTarget / avgPerOrder);
-                document.getElementById('daily-orders').textContent = `${dailyOrders}/day`;
-
-                // Calculate weekly target (4 weeks per month)
-                const weeklyTarget = monthlyGoal / 4;
-                document.getElementById('weekly-target').textContent = `$${weeklyTarget.toFixed(2)}`;
-                const weeklyOrders = Math.ceil(weeklyTarget / avgPerOrder);
-                document.getElementById('weekly-orders').textContent = `${weeklyOrders}/week`;
-
-                // Update progress message
-                document.getElementById('progress-message').textContent = `You need ${ordersNeeded} orders at $${avgPerOrder.toFixed(2)} per order to reach your $${monthlyGoal.toFixed(2)} goal.`;
-
-                // Update calculation summary
-                document.getElementById('calculation-summary').innerHTML = `
-                    <p>• Monthly Goal: $${monthlyGoal.toFixed(2)}</p>
-                    <p>• Average per Order: $${avgPerOrder.toFixed(2)}</p>
-                    <p>• Total Orders Needed: ${ordersNeeded}</p>
-                `;
-
-                // Calculate progress (if we have delivery data in the future)
-                const currentEarnings = appData.analysis?.totalEarnings || 0;
-                const progressPercent = Math.min((currentEarnings / monthlyGoal) * 100, 100);
-                document.getElementById('progress-bar').style.width = `${progressPercent}%`;
-            } else {
-                // Reset displays if no values
-                document.getElementById('orders-needed').textContent = '0';
-                document.getElementById('daily-target').textContent = '$0.00';
-                document.getElementById('daily-orders').textContent = '0/day';
-                document.getElementById('weekly-target').textContent = '$0.00';
-                document.getElementById('weekly-orders').textContent = '0/week';
-                document.getElementById('progress-bar').style.width = '0%';
-                document.getElementById('progress-message').textContent = 'Enter your monthly goal and average per order in settings to see calculated targets.';
-                document.getElementById('calculation-summary').innerHTML = '<p>Enter your monthly goal and average per order in settings to see calculated targets.</p>';
-            }
-        }
-
-        // Add a new delivery
-        function addDelivery() {
-            const amount = parseFloat(document.getElementById('delivery-amount').value);
-            const dateInput = document.getElementById('delivery-date').value;
-
-            debug('DELIVERY', 'Add delivery attempted', { amount, dateInput });
-
-            if (isNaN(amount) || amount <= 0) {
-                debug('DELIVERY', 'Invalid amount provided', { amount });
-                alert('Please enter a valid amount');
-                return;
-            }
-
-            const delivery = {
-                id: Date.now(),
-                amount: amount,
-                date: dateInput || new Date().toISOString().slice(0, 16),
-                timestamp: Date.now()
-            };
-
-            appData.deliveries.push(delivery);
-            appData.deliveries.sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
-
-            debug('DELIVERY', 'Delivery added successfully', { id: delivery.id, amount, totalDeliveries: appData.deliveries.length });
-
-            saveAllData();
-            updateDeliveryList();
-            updateDeliveryStats();
-            updateAnalysis(); // Update analysis with new delivery data
-
-            // Clear form
-            document.getElementById('delivery-amount').value = '';
-            document.getElementById('delivery-date').value = '';
-        }
-
-        // Clear all deliveries
-        function clearAllDeliveries() {
-            if (confirm('Are you sure you want to clear all deliveries? This cannot be undone.')) {
-                appData.deliveries = [];
-                saveAllData();
-                updateDeliveryList();
-                updateDeliveryStats();
-                updateAnalysis();
-            }
-        }
-
-        // Update delivery list display
-        function updateDeliveryList() {
-            const deliveryList = document.getElementById('delivery-list');
-            const deliveries = appData.deliveries || [];
-
-            if (deliveries.length === 0) {
-                deliveryList.innerHTML = '<p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>';
-                return;
-            }
-
-            deliveryList.innerHTML = deliveries.map(delivery => {
-                const date = new Date(delivery.date);
-                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                return `
-                    <div class="bg-black border border-white rounded-lg p-4 flex justify-between items-center">
-                        <div>
-                            <p class="text-white font-semibold">$${delivery.amount.toFixed(2)}</p>
-                            <p class="text-white text-sm text-gray-400">${formattedDate}</p>
-                        </div>
-                        <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 text-sm">Delete</button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Delete a delivery
-        function deleteDelivery(id) {
-            appData.deliveries = appData.deliveries.filter(d => d.id !== id);
-            saveAllData();
-            updateDeliveryList();
-            updateDeliveryStats();
-            updateAnalysis();
-        }
-
-        // Update delivery statistics
-        function updateDeliveryStats() {
-            const deliveries = appData.deliveries || [];
-            const totalEarnings = deliveries.reduce((sum, d) => sum + d.amount, 0);
-            const totalDeliveries = deliveries.length;
-            const avgPerDelivery = totalDeliveries > 0 ? totalEarnings / totalDeliveries : 0;
-
-            // Update display
-            document.getElementById('total-earnings').textContent = `$${totalEarnings.toFixed(2)}`;
-            document.getElementById('total-deliveries').textContent = totalDeliveries;
-            document.getElementById('avg-delivery').textContent = `$${avgPerDelivery.toFixed(2)}`;
-
-            // Update app data for analysis
-            appData.analysis.totalEarnings = totalEarnings;
-            appData.analysis.totalDeliveries = totalDeliveries;
-            appData.analysis.averagePerDelivery = avgPerDelivery;
-        }
-
-        function openTabSelector() {
-            tabSelector.classList.remove('hidden');
-        }
-
-        // Right-click handler
-        contentArea.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            openTabSelector();
-        });
-
-        // Double-click handler
-        contentArea.addEventListener('dblclick', (e) => {
-            openTabSelector();
-        });
-
-        // Button click handler
-        menuButton.addEventListener('click', () => {
-            openTabSelector();
-        });
-
-        // Single-click on tab selector to close
-        tabSelector.addEventListener('click', (e) => {
-            if (e.target === tabSelector) {
-                tabSelector.classList.add('hidden');
-            }
-        });
-
-        // Close tab selector on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                tabSelector.classList.add('hidden');
-            }
-        });
-
-        function switchTab(tab, isRestoring = false) {
-            debug('UI', 'Switching to tab', { tab, currentTab: appData.ui.currentTab });
-
-            // Hide all sections
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.classList.add('hidden');
-            });
-
-            // Hide welcome screen
-            welcomeScreen.classList.add('hidden');
-
-            // Show selected section
-            document.getElementById(`${tab}-section`).classList.remove('hidden');
-
-            // Close tab selector
-            tabSelector.classList.add('hidden');
-
-            debug('UI', 'Tab switch complete', { newTab: tab });
-        }
-
-        // Load settings on page load
-        loadSettings();
-
-        // Add scroll event listeners to save positions
-        const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
-        sections.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.addEventListener('scroll', debounce(() => {
-                    localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
-                }, 200));
-            }
-        });
-
-        // Auto-save on input changes
-        document.getElementById('monthly-goal')?.addEventListener('change', saveAllData);
-        document.getElementById('monthly-goal')?.addEventListener('input', debounce(() => saveAllData(), 500));
-        document.getElementById('avg-per-order')?.addEventListener('change', saveAllData);
-        document.getElementById('avg-per-order')?.addEventListener('input', debounce(() => saveAllData(), 500));
-
-        // Auto-save when switching tabs
-        const originalSwitchTab = switchTab;
-        switchTab = function(tab, isRestoring = false) {
-            // Save scroll position before switching (skip during initial load)
-            if (!isInitialLoad) {
-                saveScrollPositions();
-                saveAllData();
-            }
-            appData.ui.currentTab = tab;
-            originalSwitchTab(tab, isRestoring);
-
-            // Restore scroll position after switching
-            setTimeout(() => {
-                restoreScrollPosition(`${tab}-section`);
-            }, 150);
-
-            // Update analysis when switching to analysis tab
-            if (tab === 'analysis') {
-                updateAnalysis();
-            }
-
-            // Clear initial load flag after first switch
-            setTimeout(() => {
-                isInitialLoad = false;
-            }, 200);
-        };
-
-        // Save before page unload
-        window.addEventListener('beforeunload', saveAllData);
-
-        // Enter key handler for settings page to return to analysis
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const settingsSection = document.getElementById('settings-section');
-                // Check if we're on the settings page
-                if (!settingsSection.classList.contains('hidden')) {
-                    switchTab('analysis');
-                }
-            }
-        });
-    </script>
+ <div id="main-container" class="relative w-full h-screen overflow-hidden">
+ <!-- Tab Selector (Hidden by default) -->
+ <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+ <div class="flex flex-col gap-4 items-center">
+ <button onclick="switchTab('deliveries')" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ Deliveries
+ </button>
+ <button onclick="switchTab('analysis')" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ Analysis
+ </button>
+ <button onclick="openSettingsPopup()" class="w-64 h-16 bg-black border border-white text-white font-medium rounded-lg transition-colors">
+ Settings
+ </button>
+ </div>
+ </div>
+
+ <!-- Settings Modal Popup (Hidden by default) -->
+ <div id="settings-popup" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+ <div class="bg-black border border-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+ <div class="flex justify-between items-center mb-6">
+ <h1 class="font-large text-white">Settings</h1>
+ <button onclick="closeSettingsPopup()" class="text-white font-large hover:text-gray-300">&times;</button>
+ </div>
+ <div class="space-y-6">
+ <div>
+ <label for="monthly-goal" class="block text-white font-medium mb-2">Monthly Goal ($)</label>
+ <input type="number" id="monthly-goal" step="0.01" min="0" placeholder="Enter your monthly goal"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <p class="text-white font-small mt-1">Target earnings for the month</p>
+ </div>
+ <div>
+ <label for="avg-per-order" class="block text-white font-medium mb-2">Average $ per Delivery Order</label>
+ <input type="number" id="avg-per-order" step="0.01" min="0" placeholder="Enter average per order"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <p class="text-white font-small mt-1">Average earnings per delivery order</p>
+ </div>
+ <hr class="border-gray-700">
+ <h2 class="text-white font-medium ">On the Road Settings</h2>
+ <div>
+ <label for="mpg" class="block text-white font-medium mb-2">Vehicle MPG</label>
+ <input type="number" id="mpg" step="0.1" min="0" placeholder="Enter your MPG"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <p class="text-white font-small mt-1">Miles per gallon (highway/city driving)</p>
+ </div>
+ <div>
+ <label for="gas-price" class="block text-white font-medium mb-2">Gas Price ($/gallon)</label>
+ <input type="number" id="gas-price" step="0.01" min="0" placeholder="Enter gas price"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <p class="text-white font-small mt-1">Current average gas price</p>
+ </div>
+ <div>
+ <label for="hourly-rate" class="block text-white font-medium mb-2">Minimum Hourly Rate ($)</label>
+ <input type="number" id="hourly-rate" step="0.01" min="0" placeholder="Enter your desired hourly rate"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ <p class="text-white font-small mt-1">The minimum you want to earn per hour</p>
+ </div>
+ <hr class="border-gray-700">
+ <p class="text-white text-center font-small text-gray-400 mt-4">Settings auto-save automatically</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Content Sections -->
+ <div id="content-area" class="w-full h-full flex items-center justify-center">
+ <!-- Deliveries Section -->
+ <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
+ <h1 class="font-large font-large text-white mb-6">Deliveries</h1>
+ <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
+ <div class="space-y-6">
+ <!-- Add Delivery Form -->
+ <div class="bg-black/50 border border-white rounded-lg p-6">
+ <h2 class="font-medium text-white mb-4">Add New Delivery</h2>
+ <div class="space-y-4">
+ <div>
+ <label for="delivery-amount" class="block text-white font-medium mb-2">Earnings ($)</label>
+ <input type="number" id="delivery-amount" step="0.01" min="0" placeholder="Enter delivery earnings"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ </div>
+ <div>
+ <label for="delivery-date" class="block text-white font-medium mb-2">Date & Time</label>
+ <input type="datetime-local" id="delivery-date"
+ class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+ </div>
+ <button onclick="addDelivery()" class="w-full bg-black border border-white text-white font-medium py-3 px-6 rounded-lg transition-colors">
+ Add Delivery
+ </button>
+ </div>
+ </div>
+
+ <!-- Delivery List -->
+ <div class="bg-black/50 border border-white rounded-lg p-6">
+ <div class="flex justify-between items-center mb-4">
+ <h2 class="font-medium text-white">Delivery History</h2>
+ <button onclick="clearAllDeliveries()" class="text-white font-small hover:text-gray-300 underline">
+ Clear All
+ </button>
+ </div>
+ <div id="delivery-list" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+ <p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>
+ </div>
+ </div>
+
+ <!-- Summary Stats -->
+ <div class="bg-black/50 border border-white rounded-lg p-6">
+ <h2 class="font-medium text-white mb-4">Summary</h2>
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+ <div class="text-center">
+ <p class="text-white font-small">Total Earnings</p>
+ <p class="text-white font-large " id="total-earnings">$0.00</p>
+ </div>
+ <div class="text-center">
+ <p class="text-white font-small">Total Deliveries</p>
+ <p class="text-white font-large " id="total-deliveries">0</p>
+ </div>
+ <div class="text-center">
+ <p class="text-white font-small">Average per Delivery</p>
+ <p class="text-white font-large " id="avg-delivery">$0.00</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Analysis Section -->
+ <div id="analysis-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
+ <h1 class="font-large font-large text-white mb-6">Analysis</h1>
+ <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
+ <div class="space-y-6">
+ <!-- Quick Offer Calculator (moved to top - most frequently used) -->
+ <div class="bg-black/50 border border-white rounded-lg p-4">
+ <div class="flex flex-row gap-24 mb-4 justify-center">
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">Offer ($)</p>
+ <p class="text-white font-large cursor-pointer" id="offer-amount-display" data-type="offer-amount" data-step="0.1">$0.00</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">Miles</p>
+ <p class="text-white font-large cursor-pointer" id="offer-miles-display" data-type="offer-miles" data-step="0.5">0</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">Time (min)</p>
+ <p class="text-white font-large cursor-pointer" id="offer-minutes-display" data-type="offer-minutes" data-step="1">0</p>
+ </div>
+ </div>
+ <div class="text-center">
+ <p class="text-white font-small">Result: <span id="offer-result-text" class="">Enter values above</span></p>
+ </div>
+ </div>
+
+ <!-- Parameters & Targets (side by side for compact display) -->
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <!-- Parameters -->
+ <div class="bg-black/50 border border-white rounded-lg p-4">
+ <div class="flex flex-row gap-4 justify-center">
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">MPG</p>
+ <p class="text-white font-large cursor-pointer" id="mpg-display" data-type="mpg" data-step="1">0</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">Gas ($/gal)</p>
+ <p class="text-white font-large cursor-pointer" id="gas-price-display" data-type="gas-price" data-step="0.1">$0.00</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400 mb-1">Min Hourly ($)</p>
+ <p class="text-white font-large cursor-pointer" id="hourly-rate-display" data-type="hourly-rate" data-step="1">$0.00</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Targets -->
+ <div class="bg-black/50 border border-white rounded-lg p-4">
+ <div class="flex flex-row gap-4 justify-center">
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400">Daily</p>
+ <p class="text-white font-medium " id="daily-target">$0.00</p>
+ <p class="text-white font-small" id="daily-orders">0/day</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400">Weekly</p>
+ <p class="text-white font-medium " id="weekly-target">$0.00</p>
+ <p class="text-white font-small" id="weekly-orders">0/week</p>
+ </div>
+ <div class="flex flex-col items-center">
+ <p class="text-white font-small text-gray-400">Monthly</p>
+ <p class="text-white font-medium " id="display-monthly-goal-mini">$0.00</p>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Monthly Goal Progress (at bottom - reference only) -->
+ <div class="bg-black/50 border border-white rounded-lg p-4">
+ <div id="goal-progress-container">
+ <div class="flex justify-between items-center mb-2">
+ <span class="text-white font-small">Goal: <span id="display-monthly-goal" class="">$0.00</span></span>
+ <span class="text-white font-small">Orders Needed: <span id="orders-needed" class="">0</span></span>
+ </div>
+ <div class="w-full bg-gray-700 rounded-full h-3 mb-3">
+ <div id="progress-bar" class="bg-white h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+ </div>
+ <p id="progress-message" class="text-white text-center font-small">Enter your monthly goal in settings to see progress</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Default Welcome Screen -->
+ <div id="welcome-screen" class="text-center">
+ <h1 class="font-large font-large text-white mb-4">Delivery Goals</h1>
+ <p class="text-white font-medium md:font-medium mb-8">Double-click anywhere or tap the button to open tabs</p>
+ <button id="menu-button" class="bg-black border border-white text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg">
+ Open Menu
+ </button>
+ </div>
+ </div>
+ </div>
+
+ <script>
+ // Register service worker
+ if ('serviceWorker' in navigator) {
+ navigator.serviceWorker.register('./sw.js').then(() => {
+ console.log('Service Worker registered');
+ }).catch(err => {
+ console.log('Service Worker registration failed', err);
+ });
+ }
+
+ const tabSelector = document.getElementById('tab-selector');
+ const contentArea = document.getElementById('content-area');
+ const welcomeScreen = document.getElementById('welcome-screen');
+ const mainContainer = document.getElementById('main-container');
+ const menuButton = document.getElementById('menu-button');
+
+ // Debounce function to prevent excessive saves
+ function debounce(func, wait) {
+ let timeout;
+ return function executedFunction(...args) {
+ const later = () => {
+ clearTimeout(timeout);
+ func(...args);
+ };
+ clearTimeout(timeout);
+ timeout = setTimeout(later, wait);
+ };
+ }
+
+ // Comprehensive app data structure
+ let appData = {
+ settings: {
+ monthlyGoal: '',
+ avgPerOrder: '',
+ mpg: '',
+ gasPrice: '',
+ hourlyRate: ''
+ },
+ deliveries: [],
+ analysis: {
+ totalEarnings: 0,
+ totalDeliveries: 0,
+ averagePerDelivery: 0
+ },
+ quickOffer: {
+ amount: 0,
+ miles: 0,
+ minutes: 0,
+ },
+ ui: {
+ currentTab: '',
+ lastVisited: Date.now()
+ }
+ };
+
+ // Flag to prevent auto-save during initial load
+ let isInitialLoad = true;
+
+ // Debug utility - set to false to disable all logging
+ const ENABLE_DEBUG = false;
+
+ // Simple debug logging function
+ function debug(category, action, data = null) {
+ if (ENABLE_DEBUG) {
+ const timestamp = new Date().toLocaleTimeString();
+ if (data !== null) {
+ console.log(`[${timestamp}] [${category}] ${action}`, data);
+ } else {
+ console.log(`[${timestamp}] [${category}] ${action}`);
+ }
+ }
+ }
+
+ // Function wrapper for automatic debug logging
+ function debugWrap(fnName, fn) {
+ if (!ENABLE_DEBUG) return fn;
+ return function(...args) {
+ const timestamp = new Date().toLocaleTimeString();
+ console.log(`[${timestamp}] [${fnName}] CALLED with`, args);
+ const result = fn.apply(this, args);
+ console.log(`[${timestamp}] [${fnName}] RETURNED`, result);
+ return result;
+ };
+ }
+
+ // Save all app data to localStorage
+ function saveAllData() {
+ debug('DATA', 'Saving all data...', { currentTab: appData.ui.currentTab });
+
+ const monthlyGoalEl = document.getElementById('monthly-goal');
+ const avgPerOrderEl = document.getElementById('avg-per-order');
+ const mpgEl = document.getElementById('mpg');
+ const gasPriceEl = document.getElementById('gas-price');
+ const hourlyRateEl = document.getElementById('hourly-rate');
+
+ const monthlyGoalValue = monthlyGoalEl?.value || '';
+ const avgPerOrderValue = avgPerOrderEl?.value || '';
+ const mpgValue = mpgEl?.value || '';
+ const gasPriceValue = gasPriceEl?.value || '';
+ const hourlyRateValue = hourlyRateEl?.value || '';
+
+ debug('DATA', 'Input values to save', {
+ monthlyGoal: monthlyGoalValue,
+ avgPerOrder: avgPerOrderValue,
+ mpg: mpgValue,
+ gasPrice: gasPriceValue,
+ hourlyRate: hourlyRateValue,
+ quickOffer: appData.quickOffer
+ });
+
+ const dataToSave = {
+ ...appData,
+ settings: {
+ monthlyGoal: monthlyGoalValue,
+ avgPerOrder: avgPerOrderValue,
+ mpg: mpgValue,
+ gasPrice: gasPriceValue,
+ hourlyRate: hourlyRateValue
+ },
+ ui: {
+ ...appData.ui,
+ currentTab: getCurrentActiveTab(),
+ lastVisited: Date.now()
+ }
+ };
+
+ try {
+ localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
+ const savedData = localStorage.getItem('orderCalcData');
+ const parsedSavedData = JSON.parse(savedData);
+ debug('DATA', 'All data saved successfully', {
+ deliveriesCount: appData.deliveries?.length,
+ settings: parsedSavedData?.settings,
+ quickOffer: parsedSavedData?.quickOffer
+ });
+ } catch (e) {
+ debug('ERROR', 'Failed to save data to localStorage', e);
+ console.error('localStorage error:', e);
+ }
+ }
+
+ // Save scroll position
+ function saveScrollPositions() {
+ const sections = ['deliveries-section', 'analysis-section'];
+ sections.forEach(sectionId => {
+ const section = document.getElementById(sectionId);
+ if (section) {
+ localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
+ }
+ });
+ }
+
+ // Restore scroll position for a specific section
+ function restoreScrollPosition(sectionId) {
+ const savedScroll = localStorage.getItem(`scroll_${sectionId}`);
+ if (savedScroll !== null) {
+ const section = document.getElementById(sectionId);
+ if (section) {
+ section.scrollTop = parseInt(savedScroll, 10);
+ }
+ }
+ }
+
+ // Get currently active tab
+ function getCurrentActiveTab() {
+ const sections = ['deliveries-section', 'analysis-section', 'settings-section'];
+ for (const sectionId of sections) {
+ const section = document.getElementById(sectionId);
+ if (section && !section.classList.contains('hidden')) {
+ return sectionId.replace('-section', '');
+ }
+ }
+ return '';
+ }
+
+ // Load all app data from localStorage
+ function loadAllData() {
+ debug('DATA', 'Loading all data...');
+
+ const savedData = localStorage.getItem('orderCalcData');
+ debug('DATA', 'localStorage data found', { hasData: !!savedData, length: savedData?.length });
+
+ if (savedData) {
+ try {
+ const parsedData = JSON.parse(savedData);
+ debug('DATA', 'Parsed data', { settings: parsedData?.settings, ui: parsedData?.ui });
+ appData = parsedData;
+
+ // Restore settings
+ if (parsedData.settings?.monthlyGoal !== undefined) {
+ document.getElementById('monthly-goal').value = parsedData.settings.monthlyGoal;
+ debug('DATA', 'Restored monthly goal', { value: parsedData.settings.monthlyGoal });
+ }
+ if (parsedData.settings?.avgPerOrder !== undefined) {
+ document.getElementById('avg-per-order').value = parsedData.settings.avgPerOrder;
+ debug('DATA', 'Restored average per order', { value: parsedData.settings.avgPerOrder });
+ }
+ if (parsedData.settings?.mpg !== undefined) {
+ document.getElementById('mpg').value = parsedData.settings.mpg;
+ debug('DATA', 'Restored MPG', { value: parsedData.settings.mpg });
+ }
+ if (parsedData.settings?.gasPrice !== undefined) {
+ document.getElementById('gas-price').value = parsedData.settings.gasPrice;
+ debug('DATA', 'Restored gas price', { value: parsedData.settings.gasPrice });
+ }
+ if (parsedData.settings?.hourlyRate !== undefined) {
+ document.getElementById('hourly-rate').value = parsedData.settings.hourlyRate;
+ debug('DATA', 'Restored hourly rate', { value: parsedData.settings.hourlyRate });
+ }
+
+ // Restore delivery data
+ if (!appData.deliveries) {
+ appData.deliveries = [];
+ }
+ updateDeliveryList();
+ updateDeliveryStats();
+
+ // Update analysis display with restored settings
+ updateAnalysis();
+
+ // Quick offer values (stored in a separate object if available)
+ if (parsedData.quickOffer) {
+ appData.quickOffer = parsedData.quickOffer;
+ } else {
+ appData.quickOffer = {
+ amount: 0,
+ miles: 0,
+ minutes: 0,
+ };
+ }
+ updateQuickOfferDisplay();
+
+ // Restore previous tab if available, otherwise default to analysis
+ const tabToRestore = parsedData.ui?.currentTab || 'analysis';
+ debug('UI', 'Restoring tab', { tab: tabToRestore });
+ setTimeout(() => {
+ restoreUIState(tabToRestore);
+ }, 100);
+
+ debug('DATA', 'All data loaded successfully', { tab: tabToRestore, deliveries: appData.deliveries?.length });
+ } catch (e) {
+ debug('ERROR', 'Error loading data', e);
+ console.error('Error loading data:', e);
+ }
+ } else {
+ debug('DATA', 'No saved data found, initializing...');
+ // First time - default to analysis tab
+ setTimeout(() => {
+ restoreUIState('analysis');
+ }, 100);
+ appData.quickOffer = {
+ amount: 0,
+ miles: 0,
+ minutes: 0,
+ };
+ }
+ }
+
+ // Restore UI state (tab and scroll position)
+ function restoreUIState(tab) {
+ if (tab && document.getElementById(`${tab}-section`)) {
+ // Show the tab without triggering any load/save
+ document.querySelectorAll('[id$="-section"]').forEach(section => {
+ section.classList.add('hidden');
+ });
+ welcomeScreen.classList.add('hidden');
+ document.getElementById(`${tab}-section`).classList.remove('hidden');
+
+ // Restore scroll position after tab is visible
+ setTimeout(() => {
+ restoreScrollPosition(`${tab}-section`);
+ }, 150);
+ }
+ }
+
+ // Calculate and update analysis page
+ function updateAnalysis() {
+ const monthlyGoal = parseFloat(document.getElementById('monthly-goal')?.value) || 0;
+ const avgPerOrder = parseFloat(document.getElementById('avg-per-order')?.value) || 0;
+
+ // Update display values
+ document.getElementById('display-monthly-goal').textContent = `$${monthlyGoal.toFixed(2)}`;
+ document.getElementById('display-monthly-goal-mini').textContent = `$${monthlyGoal.toFixed(2)}`;
+
+ if (monthlyGoal > 0 && avgPerOrder > 0) {
+ // Calculate orders needed
+ const ordersNeeded = Math.ceil(monthlyGoal / avgPerOrder);
+ document.getElementById('orders-needed').textContent = ordersNeeded;
+
+ // Calculate daily target (assuming 30 days per month)
+ const dailyTarget = monthlyGoal / 30;
+ document.getElementById('daily-target').textContent = `$${dailyTarget.toFixed(2)}`;
+ const dailyOrders = Math.ceil(dailyTarget / avgPerOrder);
+ document.getElementById('daily-orders').textContent = `${dailyOrders}/day`;
+
+ // Calculate weekly target (4 weeks per month)
+ const weeklyTarget = monthlyGoal / 4;
+ document.getElementById('weekly-target').textContent = `$${weeklyTarget.toFixed(2)}`;
+ const weeklyOrders = Math.ceil(weeklyTarget / avgPerOrder);
+ document.getElementById('weekly-orders').textContent = `${weeklyOrders}/week`;
+
+ // Update progress message
+ document.getElementById('progress-message').textContent = `You need ${ordersNeeded} orders at $${avgPerOrder.toFixed(2)} per order to reach your $${monthlyGoal.toFixed(2)} goal.`;
+
+ // Calculate progress (if we have delivery data in the future)
+ const currentEarnings = appData.analysis?.totalEarnings || 0;
+ const progressPercent = Math.min((currentEarnings / monthlyGoal) * 100, 100);
+ document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+ } else {
+ // Reset displays if no values
+ document.getElementById('orders-needed').textContent = '0';
+ document.getElementById('daily-target').textContent = '$0.00';
+ document.getElementById('daily-orders').textContent = '0/day';
+ document.getElementById('weekly-target').textContent = '$0.00';
+ document.getElementById('weekly-orders').textContent = '0/week';
+ document.getElementById('progress-bar').style.width = '0%';
+ document.getElementById('progress-message').textContent = 'Enter your monthly goal and average per order in settings to see calculated targets.';
+ }
+
+ // Update quick offer display
+ updateQuickOfferDisplay();
+ }
+
+ // Update quick offer display
+ function updateQuickOfferDisplay() {
+ const quickOffer = appData.quickOffer || { amount: 0, miles: 0, minutes: 0 };
+
+ document.getElementById('offer-amount-display').textContent = `$${quickOffer.amount.toFixed(2)}`;
+ document.getElementById('offer-miles-display').textContent = quickOffer.miles.toFixed(1);
+ document.getElementById('offer-minutes-display').textContent = Math.round(quickOffer.minutes);
+
+ const mpg = parseFloat(document.getElementById('mpg').value) || 0;
+ const gasPrice = parseFloat(document.getElementById('gas-price').value) || 0;
+ const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 0;
+
+ document.getElementById('mpg-display').textContent = mpg || '0';
+ document.getElementById('gas-price-display').textContent = `$${(gasPrice || 0).toFixed(2)}`;
+ document.getElementById('hourly-rate-display').textContent = `$${(hourlyRate || 0).toFixed(2)}`;
+
+ // Calculate result
+ if (quickOffer.amount > 0 || quickOffer.miles >0 || quickOffer.minutes > 0) {
+ const fuelCost = mpg > 0 && quickOffer.miles > 0 ? (quickOffer.miles / mpg) * gasPrice : 0;
+ const timeValue = hourlyRate > 0 && quickOffer.minutes > 0 ? (quickOffer.minutes / 60) * hourlyRate : 0;
+ const minimumAcceptable = fuelCost + timeValue;
+ const profit = quickOffer.amount - minimumAcceptable;
+
+ const resultHtml = profit >= 0
+ ? `<span class="text-green-400">+$${profit.toFixed(2)}</span> profit (min: $${minimumAcceptable.toFixed(2)})`
+ : `<span class="text-red-400">-$${Math.abs(profit).toFixed(2)}</span> loss (need $${minimumAcceptable.toFixed(2)})`;
+
+ document.getElementById('offer-result-text').innerHTML = resultHtml;
+ } else {
+ document.getElementById('offer-result-text').textContent = 'Drag values above';
+ }
+ }
+
+ // Add a new delivery
+ function addDelivery() {
+ const amount = parseFloat(document.getElementById('delivery-amount').value);
+ const dateInput = document.getElementById('delivery-date').value;
+
+ debug('DELIVERY', 'Add delivery attempted', { amount, dateInput });
+
+ if (isNaN(amount) || amount <= 0) {
+ debug('DELIVERY', 'Invalid amount provided', { amount });
+ alert('Please enter a valid amount');
+ return;
+ }
+
+ const delivery = {
+ id: Date.now(),
+ amount: amount,
+ date: dateInput || new Date().toISOString().slice(0, 16),
+ timestamp: Date.now()
+ };
+
+ appData.deliveries.push(delivery);
+ appData.deliveries.sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
+
+ debug('DELIVERY', 'Delivery added successfully', { id: delivery.id, amount, totalDeliveries: appData.deliveries.length });
+
+ saveAllData();
+ updateDeliveryList();
+ updateDeliveryStats();
+ updateAnalysis(); // Update analysis with new delivery data
+
+ // Clear form
+ document.getElementById('delivery-amount').value = '';
+ document.getElementById('delivery-date').value = '';
+ }
+
+ // Clear all deliveries
+ function clearAllDeliveries() {
+ if (confirm('Are you sure you want to clear all deliveries? This cannot be undone.')) {
+ appData.deliveries = [];
+ saveAllData();
+ updateDeliveryList();
+ updateDeliveryStats();
+ updateAnalysis();
+ }
+ }
+
+ // Update delivery list display
+ function updateDeliveryList() {
+ const deliveryList = document.getElementById('delivery-list');
+ const deliveries = appData.deliveries || [];
+
+ if (deliveries.length === 0) {
+ deliveryList.innerHTML = '<p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>';
+ return;
+ }
+
+ deliveryList.innerHTML = deliveries.map(delivery => {
+ const date = new Date(delivery.date);
+ const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+ return `
+ <div class="bg-black border border-white rounded-lg p-4 flex justify-between items-center">
+ <div>
+ <p class="text-white ">$${delivery.amount.toFixed(2)}</p>
+ <p class="text-white font-small text-gray-400">${formattedDate}</p>
+ </div>
+ <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 font-small">Delete</button>
+ </div>
+ `;
+ }).join('');
+ }
+
+ // Delete a delivery
+ function deleteDelivery(id) {
+ appData.deliveries = appData.deliveries.filter(d => d.id !== id);
+ saveAllData();
+ updateDeliveryList();
+ updateDeliveryStats();
+ updateAnalysis();
+ }
+
+ // Update delivery statistics
+ function updateDeliveryStats() {
+ const deliveries = appData.deliveries || [];
+ const totalEarnings = deliveries.reduce((sum, d) => sum + d.amount, 0);
+ const totalDeliveries = deliveries.length;
+ const avgPerDelivery = totalDeliveries > 0 ? totalEarnings / totalDeliveries : 0;
+
+ // Update display
+ document.getElementById('total-earnings').textContent = `$${totalEarnings.toFixed(2)}`;
+ document.getElementById('total-deliveries').textContent = totalDeliveries;
+ document.getElementById('avg-delivery').textContent = `$${avgPerDelivery.toFixed(2)}`;
+
+ // Update app data for analysis
+ appData.analysis.totalEarnings = totalEarnings;
+ appData.analysis.totalDeliveries = totalDeliveries;
+ appData.analysis.averagePerDelivery = avgPerDelivery;
+ }
+
+ // Drag gesture handler for quick value adjustment
+ let currentDrag = null;
+ 
+ function setupDragGestures() {
+ const dragElements = document.querySelectorAll('[data-type]');
+ 
+ const handleStart = (e) => {
+ const el = e.target.closest('[data-type]');
+ if (!el) return;
+ 
+ const type = el.dataset.type;
+ const step = parseFloat(el.dataset.step) || 1;
+ 
+ currentDrag = {
+ type,
+ step,
+ startX: e.clientX || e.touches[0].clientX,
+ startY: e.clientY || e.touches[0].clientY,
+ startValue: getValueByType(type)
+ };
+ 
+ e.preventDefault();
+ };
+ 
+ const handleMove = (e) => {
+ if (!currentDrag) return;
+ 
+ const clientX = e.clientX || e.touches[0].clientX;
+ const deltaX = clientX - currentDrag.startX;
+ 
+ const pixelsPerStep = 20;
+ const steps = Math.round(deltaX / pixelsPerStep);
+ const newValue = Math.max(0, currentDrag.startValue + (steps * currentDrag.step));
+ 
+ setValueByType(currentDrag.type, newValue);
+ e.preventDefault();
+ };
+ 
+ const handleEnd = () => {
+ if (!currentDrag) return;
+ currentDrag = null;
+ saveAllData();
+ updateQuickOfferDisplay();
+ };
+ 
+ dragElements.forEach(el => {
+ el.addEventListener('mousedown', handleStart);
+ el.addEventListener('touchstart', handleStart, { passive: false });
+ });
+ 
+ document.addEventListener('mousemove', handleMove);
+ document.addEventListener('touchmove', handleMove, { passive: false });
+ document.addEventListener('mouseup', handleEnd);
+ document.addEventListener('touchend', handleEnd);
+ }
+ 
+ function getValueByType(type) {
+ if (type.startsWith('offer')) {
+ const key = type.replace('offer-', '');
+ return appData.quickOffer?.[key] || 0;
+ } else {
+ return parseFloat(document.getElementById(type)?.value) || 0;
+ }
+ }
+ 
+ function setValueByType(type, value) {
+ if (type.startsWith('offer')) {
+ const key = type.replace('offer-', '');
+ appData.quickOffer[key] = value;
+ } else {
+ const el = document.getElementById(type);
+ if (el) el.value = value;
+ }
+ updateQuickOfferDisplay();
+ }
+
+ function openTabSelector() {
+ tabSelector.classList.remove('hidden');
+ }
+
+ // Right-click handler
+ contentArea.addEventListener('contextmenu', (e) => {
+ e.preventDefault();
+ openTabSelector();
+ });
+
+ // Double-click handler
+ contentArea.addEventListener('dblclick', (e) => {
+ openTabSelector();
+ });
+
+ // Button click handler
+ menuButton.addEventListener('click', () => {
+ openTabSelector();
+ });
+
+ // Single-click on tab selector to close
+ tabSelector.addEventListener('click', (e) => {
+ if (e.target === tabSelector) {
+ tabSelector.classList.add('hidden');
+ }
+ });
+
+ // Close tab selector on escape key
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'Escape') {
+ tabSelector.classList.add('hidden');
+ closeSettingsPopup();
+ }
+ });
+
+ // Settings Popup Functions
+ const settingsPopup = document.getElementById('settings-popup');
+ 
+ function openSettingsPopup() {
+ tabSelector.classList.add('hidden');
+ settingsPopup.classList.remove('hidden');
+ }
+ 
+ function closeSettingsPopup() {
+ settingsPopup.classList.add('hidden');
+ saveAllData();
+ }
+ 
+ // Close popup when clicking outside
+ settingsPopup.addEventListener('click', (e) => {
+ if (e.target === settingsPopup) {
+ closeSettingsPopup();
+ }
+ });
+ 
+ function switchTab(tab, isRestoring = false) {
+ debug('UI', 'Switching to tab', { tab, currentTab: appData.ui.currentTab });
+
+ // Hide all sections
+ document.querySelectorAll('[id$="-section"]').forEach(section => {
+ section.classList.add('hidden');
+ });
+
+ // Hide welcome screen
+ welcomeScreen.classList.add('hidden');
+
+ // Show selected section
+ document.getElementById(`${tab}-section`).classList.remove('hidden');
+
+ // Close tab selector
+ tabSelector.classList.add('hidden');
+
+ debug('UI', 'Tab switch complete', { newTab: tab });
+ }
+
+ // Load settings on page load
+ loadAllData();
+
+ // Setup drag gestures for quick value adjustment
+ setupDragGestures();
+
+ // Add scroll event listeners to save positions
+ const sections = ['deliveries-section', 'analysis-section'];
+ sections.forEach(sectionId => {
+ const section = document.getElementById(sectionId);
+ if (section) {
+ section.addEventListener('scroll', debounce(() => {
+ localStorage.setItem(`scroll_${sectionId}`, section.scrollTop);
+ }, 200));
+ }
+ });
+
+ // Auto-save on input changes
+ document.getElementById('monthly-goal')?.addEventListener('change', saveAllData);
+ document.getElementById('monthly-goal')?.addEventListener('input', debounce(() => saveAllData(), 500));
+ document.getElementById('avg-per-order')?.addEventListener('change', saveAllData);
+ document.getElementById('avg-per-order')?.addEventListener('input', debounce(() => saveAllData(), 500));
+ document.getElementById('mpg')?.addEventListener('change', saveAllData);
+ document.getElementById('mpg')?.addEventListener('input', debounce(() => saveAllData(), 500));
+ document.getElementById('gas-price')?.addEventListener('change', saveAllData);
+ document.getElementById('gas-price')?.addEventListener('input', debounce(() => saveAllData(), 500));
+ document.getElementById('hourly-rate')?.addEventListener('change', saveAllData);
+ document.getElementById('hourly-rate')?.addEventListener('input', debounce(() => saveAllData(), 500));
+
+ // Auto-save when switching tabs
+ const originalSwitchTab = switchTab;
+ switchTab = function(tab, isRestoring = false) {
+ // Save scroll position before switching (skip during initial load)
+ if (!isInitialLoad) {
+ saveScrollPositions();
+ saveAllData();
+ }
+ appData.ui.currentTab = tab;
+ originalSwitchTab(tab, isRestoring);
+
+ // Restore scroll position after switching
+ setTimeout(() => {
+ restoreScrollPosition(`${tab}-section`);
+ }, 150);
+
+ // Update analysis when switching to analysis tab
+ if (tab === 'analysis') {
+ updateAnalysis();
+ }
+
+ // Clear initial load flag after first switch
+ setTimeout(() => {
+ isInitialLoad = false;
+ }, 200);
+ };
+
+ // Save before page unload
+ window.addEventListener('beforeunload', saveAllData);
+
+ // Enter key handler for settings popup to return to analysis
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'Enter') {
+ if (!settingsPopup.classList.contains('hidden')) {
+ closeSettingsPopup();
+ switchTab('analysis');
+ }
+ }
+ });
+ </script>
 </body>
 </html>
+
+
+
+
