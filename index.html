@@ -51,6 +51,18 @@
  scrollbar-width: none;
  }
 
+ /* Pull-to-refresh indicator styles */
+ #pull-to-refresh {
+ transform: translateY(-100%);
+ transition: transform 0.2s ease-out;
+ }
+ #pull-to-refresh.showing {
+ transform: translateY(-50px);
+ }
+ #pull-to-refresh.refreshing {
+ transform: translateY(0);
+ }
+
  /* Font size classes - only 3 sizes allowed */
  .font-small {
  font-size: 0.75rem;
@@ -77,10 +89,57 @@
  overflow-x: auto !important;
  }
 
+ /* App launch button styles */
+ .app-launch-btn {
+ position: relative;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ width: 50px;
+ height: 50px;
+ border: 1px solid white;
+ border-radius: 6px;
+ background: transparent;
+ color: white;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ }
+ .app-launch-btn:hover {
+ background: rgba(255,255,255,0.1);
+ transform: scale(1.05);
+ }
+ .app-launch-btn:active {
+ transform: scale(0.95);
+ }
+ .app-icon {
+ font-size: 0.8rem;
+ margin-bottom: 0.1rem;
+ }
+ .app-name {
+ font-size: 0.5rem;
+ white-space: nowrap;
+ }
+ .app-launch-bar {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ gap: 8px;
+ padding: 0.5rem;
+ border-top: 1px solid rgba(255,255,255,0.2);
+ }
+ .app-launch-bar.hidden {
+ display: none;
+ }
+
  </style>
 </head>
 <body class="bg-black min-h-screen">
  <div id="main-container" class="relative w-full h-screen overflow-hidden">
+ <!-- Pull-to-refresh indicator -->
+ <div id="pull-to-refresh" class="absolute top-0 left-0 right-0 flex justify-center items-center h-24 z-50 overflow-hidden pointer-events-none">
+ <div class="text-white font-small text-center whitespace-nowrap">Pull down to clear cache & refresh</div>
+ </div>
  <!-- Tab Selector (Hidden by default) -->
  <div id="tab-selector" class="hidden absolute inset-0 bg-black/80 flex items-center justify-center z-50 whitespace-nowrap">
  <div class="flex flex-col gap-4 items-center whitespace-nowrap">
@@ -135,6 +194,29 @@
  <input type="number" id="hourly-rate" step="0.01" min="0" placeholder="Enter your desired hourly rate"
  class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
  <p class="text-white font-small mt-1">The minimum you want to earn per hour</p>
+ </div>
+ <hr style="border: 0; border-top: 0.5px solid white;">
+
+ <!-- Additional Settings Dropdown -->
+ <div>
+ <button onclick="toggleAdditionalSettings()" class="w-full py-3 px-4 bg-black text-white font-medium border border-white rounded-lg flex justify-between items-center">
+ <span>Additional Settings</span>
+ <span id="additional-settings-arrow" class="transform transition-transform">▼</span>
+ </button>
+ <div id="additional-settings-content" class="hidden mt-4 space-y-4">
+ <div class="flex items-center justify-between">
+ <label class="text-white font-medium">Show DoorDash Button</label>
+ <input type="checkbox" id="show-doordash" class="w-6 h-6 cursor-pointer" checked>
+ </div>
+ <div class="flex items-center justify-between">
+ <label class="text-white font-medium">Show Shipt Button</label>
+ <input type="checkbox" id="show-shipt" class="w-6 h-6 cursor-pointer" checked>
+ </div>
+ <div class="flex items-center justify-between">
+ <label class="text-white font-medium">Show Uber Eats Button</label>
+ <input type="checkbox" id="show-ubereats" class="w-6 h-6 cursor-pointer" checked>
+ </div>
+ </div>
  </div>
  <hr style="border: 0; border-top: 0.5px solid white;">
  <p class="text-white text-center font-small text-gray-400 mt-4">Settings auto-save automatically</p>
@@ -203,6 +285,22 @@
  <p class="text-white font-large " id="avg-delivery">$0.00</p>
  </div>
  </div>
+ </div>
+
+ <!-- App Launch Bar -->
+ <div class="app-launch-bar">
+ <button onclick="openDoorDash()" class="app-launch-btn">
+ <div class="app-icon">DD</div>
+ <div class="app-name">DoorDash</div>
+ </button>
+ <button onclick="openShipt()" class="app-launch-btn">
+ <div class="app-icon">S</div>
+ <div class="app-name">Shipt</div>
+ </button>
+ <button onclick="openUberEats()" class="app-launch-btn">
+ <div class="app-icon">UE</div>
+ <div class="app-name">Uber Eats</div>
+ </button>
  </div>
  </div>
  </div>
@@ -296,6 +394,23 @@
  <p id="progress-message" class="text-white text-center font-small">Enter your monthly goal in settings to see progress</p>
  </div>
  </div>
+
+ <!-- App Launch Bar -->
+ <div class="app-launch-bar">
+ <button onclick="openDoorDash()" class="app-launch-btn">
+ <div class="app-icon">DD</div>
+ <div class="app-name">DoorDash</div>
+ </button>
+ <button onclick="openShipt()" class="app-launch-btn">
+ <div class="app-icon">S</div>
+ <div class="app-name">Shipt</div>
+ </button>
+ <button onclick="openUberEats()" class="app-launch-btn">
+ <div class="app-icon">UE</div>
+ <div class="app-name">Uber Eats</div>
+ </button>
+ </div>
+ </div>
  </div>
  </div>
  </div>
@@ -307,6 +422,22 @@
  <button id="menu-button" class="bg-black text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg">
  Open Menu
  </button>
+
+ <!-- App Launch Bar -->
+ <div class="app-launch-bar">
+ <button onclick="openDoorDash()" class="app-launch-btn">
+ <div class="app-icon">DD</div>
+ <div class="app-name">DoorDash</div>
+ </button>
+ <button onclick="openShipt()" class="app-launch-btn">
+ <div class="app-icon">S</div>
+ <div class="app-name">Shipt</div>
+ </button>
+ <button onclick="openUberEats()" class="app-launch-btn">
+ <div class="app-icon">UE</div>
+ <div class="app-name">Uber Eats</div>
+ </button>
+ </div>
  </div>
  </div>
  </div>
@@ -405,12 +536,18 @@
  const mpgEl = document.getElementById('mpg');
  const gasPriceEl = document.getElementById('gas-price');
  const hourlyRateEl = document.getElementById('hourly-rate');
+ const showDoorDashEl = document.getElementById('show-doordash');
+ const showShiptEl = document.getElementById('show-shipt');
+ const showUberEatsEl = document.getElementById('show-ubereats');
 
  const monthlyGoalValue = monthlyGoalEl?.value || '';
  const avgPerOrderValue = avgPerOrderEl?.value || '';
  const mpgValue = mpgEl?.value || '';
  const gasPriceValue = gasPriceEl?.value || '';
  const hourlyRateValue = hourlyRateEl?.value || '';
+ const showDoorDashValue = showDoorDashEl?.checked ?? true;
+ const showShiptValue = showShiptEl?.checked ?? true;
+ const showUberEatsValue = showUberEatsEl?.checked ?? true;
 
  debug('DATA', 'Input values to save', {
  monthlyGoal: monthlyGoalValue,
@@ -418,6 +555,9 @@
  mpg: mpgValue,
  gasPrice: gasPriceValue,
  hourlyRate: hourlyRateValue,
+ showDoorDash: showDoorDashValue,
+ showShipt: showShiptValue,
+ showUberEats: showUberEatsValue,
  quickOffer: appData.quickOffer
  });
 
@@ -428,7 +568,10 @@
  avgPerOrder: avgPerOrderValue,
  mpg: mpgValue,
  gasPrice: gasPriceValue,
- hourlyRate: hourlyRateValue
+ hourlyRate: hourlyRateValue,
+ showDoorDash: showDoorDashValue,
+ showShipt: showShiptValue,
+ showUberEats: showUberEatsValue
  },
  ui: {
  ...appData.ui,
@@ -519,6 +662,18 @@
  if (parsedData.settings?.hourlyRate !== undefined) {
  document.getElementById('hourly-rate').value = parsedData.settings.hourlyRate;
  debug('DATA', 'Restored hourly rate', { value: parsedData.settings.hourlyRate });
+ }
+ if (parsedData.settings?.showDoorDash !== undefined) {
+ document.getElementById('show-doordash').checked = parsedData.settings.showDoorDash;
+ debug('DATA', 'Restored showDoorDash', { value: parsedData.settings.showDoorDash });
+ }
+ if (parsedData.settings?.showShipt !== undefined) {
+ document.getElementById('show-shipt').checked = parsedData.settings.showShipt;
+ debug('DATA', 'Restored showShipt', { value: parsedData.settings.showShipt });
+ }
+ if (parsedData.settings?.showUberEats !== undefined) {
+ document.getElementById('show-ubereats').checked = parsedData.settings.showUberEats;
+ debug('DATA', 'Restored showUberEats', { value: parsedData.settings.showUberEats });
  }
 
  // Restore delivery data
@@ -639,16 +794,16 @@
  const quickOffer = appData.quickOffer || { amount: 0, miles: 0, minutes: 0 };
 
  document.getElementById('offer-amount-display').textContent = `$${quickOffer.amount.toFixed(2)}`;
- document.getElementById('offer-miles-display').textContent = quickOffer.miles.toFixed(1);
- document.getElementById('offer-minutes-display').textContent = Math.round(quickOffer.minutes);
+ document.getElementById('offer-miles-display').textContent = quickOffer.miles.toFixed(2);
+ document.getElementById('offer-minutes-display').textContent = quickOffer.minutes.toFixed(2);
 
  const mpg = parseFloat(document.getElementById('mpg').value) || 0;
  const gasPrice = parseFloat(document.getElementById('gas-price').value) || 0;
  const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 0;
 
- document.getElementById('mpg-display').textContent = mpg || '0';
- document.getElementById('gas-price-display').textContent = `$${(gasPrice || 0).toFixed(2)}`;
- document.getElementById('hourly-rate-display').textContent = `$${(hourlyRate || 0).toFixed(2)}`;
+ document.getElementById('mpg-display').textContent = mpg.toFixed(2);
+ document.getElementById('gas-price-display').textContent = `$${gasPrice.toFixed(2)}`;
+ document.getElementById('hourly-rate-display').textContent = `$${hourlyRate.toFixed(2)}`;
 
  // Calculate result
  if (quickOffer.amount > 0 || quickOffer.miles >0 || quickOffer.minutes > 0) {
@@ -916,11 +1071,74 @@
  debug('UI', 'Tab switch complete', { newTab: tab });
  }
 
+ // Open DoorDash app
+ function openDoorDash() {
+ window.location.href = 'doordash://';
+ console.log('Opening DoorDash app');
+ }
+
+ // Open Shipt app
+ function openShipt() {
+ window.location.href = 'shipt://';
+ console.log('Opening Shipt app');
+ }
+
+ // Open Uber Eats app
+ function openUberEats() {
+ window.location.href = 'ubereats://';
+ console.log('Opening Uber Eats app');
+ }
+
+ // Toggle additional settings dropdown
+ function toggleAdditionalSettings() {
+ const content = document.getElementById('additional-settings-content');
+ const arrow = document.getElementById('additional-settings-arrow');
+ content.classList.toggle('hidden');
+ arrow.classList.toggle('rotate-180');
+ updateAppButtonVisibility();
+ }
+
+ // Update app button visibility based on toggle settings
+ function updateAppButtonVisibility() {
+ const showDoorDash = document.getElementById('show-doordash').checked;
+ const showShipt = document.getElementById('show-shipt').checked;
+ const showUberEats = document.getElementById('show-ubereats').checked;
+
+ const doorDashBtns = document.querySelectorAll('button[onclick="openDoorDash()"]');
+ const shiptBtns = document.querySelectorAll('button[onclick="openShipt()"]');
+ const uberEatsBtns = document.querySelectorAll('button[onclick="openUberEats()"]');
+
+ doorDashBtns.forEach(btn => btn.style.display = showDoorDash ? 'flex' : 'none');
+ shiptBtns.forEach(btn => btn.style.display = showShipt ? 'flex' : 'none');
+ uberEatsBtns.forEach(btn => btn.style.display = showUberEats ? 'flex' : 'none');
+
+ checkAllAppsHidden();
+ }
+
+ // Check if all apps are hidden and hide the entire bar
+ function checkAllAppsHidden() {
+ const showDoorDash = document.getElementById('show-doordash').checked;
+ const showShipt = document.getElementById('show-shipt').checked;
+ const showUberEats = document.getElementById('show-ubereats').checked;
+
+ const appBars = document.querySelectorAll('.app-launch-bar');
+ appBars.forEach(bar => {
+ if (!showDoorDash && !showShipt && !showUberEats) {
+ bar.classList.add('hidden');
+ } else {
+ bar.classList.remove('hidden');
+ }
+ });
+ }
+
  // Load settings on page load
  loadAllData();
 
  // Setup drag gestures for quick value adjustment
  setupDragGestures();
+
+ // Initialize app button visibility
+ updateAppButtonVisibility();
 
  // Add scroll event listeners to save positions
  const sections = ['deliveries-section', 'analysis-section'];
@@ -944,6 +1162,18 @@
  document.getElementById('gas-price')?.addEventListener('input', debounce(() => saveAllData(), 500));
  document.getElementById('hourly-rate')?.addEventListener('change', saveAllData);
  document.getElementById('hourly-rate')?.addEventListener('input', debounce(() => saveAllData(), 500));
+ document.getElementById('show-doordash')?.addEventListener('change', () => {
+ saveAllData();
+ updateAppButtonVisibility();
+ });
+ document.getElementById('show-shipt')?.addEventListener('change', () => {
+ saveAllData();
+ updateAppButtonVisibility();
+ });
+ document.getElementById('show-ubereats')?.addEventListener('change', () => {
+ saveAllData();
+ updateAppButtonVisibility();
+ });
 
  // Auto-save when switching tabs
  const originalSwitchTab = switchTab;
@@ -984,6 +1214,69 @@
  }
  }
  });
+
+ // Pull-to-refresh functionality for mobile
+ let pullStartY = 0;
+ let pullCurrentY = 0;
+ let pullDistance = 0;
+ let isPulling = false;
+ let isRefreshing = false;
+ const PULL_THRESHOLD = 100; // pixels to pull down to trigger refresh
+
+ const pullToRefreshIndicator = document.getElementById('pull-to-refresh');
+
+ function handleTouchStart(e) {
+ if (isRefreshing) return;
+ if (e.touches.length === 1 && window.scrollY === 0) {
+ pullStartY = e.touches[0].clientY;
+ isPulling = true;
+ }
+ }
+
+ function handleTouchMove(e) {
+ if (!isPulling || isRefreshing) return;
+
+ pullCurrentY = e.touches[0].clientY;
+ pullDistance = pullCurrentY - pullStartY;
+
+ // Only show indicator if pulling down from top
+ if (pullDistance > 0) {
+ const clampedDistance = Math.min(pullDistance, 200);
+ pullToRefreshIndicator.style.transform = `translateY(${clampedDistance - 100}px)`;
+ pullToRefreshIndicator.classList.add('showing');
+ }
+ }
+
+ function handleTouchEnd(e) {
+ if (!isPulling || isRefreshing) return;
+ isPulling = false;
+
+ if (pullDistance >= PULL_THRESHOLD) {
+ // Trigger refresh
+ isRefreshing = true;
+ pullToRefreshIndicator.classList.add('refreshing');
+ pullToRefreshIndicator.querySelector('div').textContent = 'Clearing cache...';
+
+ setTimeout(() => {
+ // Clear all localStorage
+ localStorage.clear();
+ sessionStorage.clear();
+
+ // Hard refresh the page
+ location.reload(true);
+ }, 500);
+ } else {
+ // Reset indicator
+ pullToRefreshIndicator.classList.remove('showing');
+ pullToRefreshIndicator.style.transform = 'translateY(-100%)';
+ }
+ pullDistance = 0;
+ }
+
+ // Add touch event listeners for pull-to-refresh
+ document.addEventListener('touchstart', handleTouchStart, { passive: true });
+ document.addEventListener('touchmove', handleTouchMove, { passive: true });
+ document.addEventListener('touchend', handleTouchEnd);
  </script>
 </body>
 </html>
