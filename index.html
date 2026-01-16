@@ -276,11 +276,18 @@
         function saveAllData() {
             debug('DATA', 'Saving all data...', { currentTab: appData.ui.currentTab });
 
+            const monthlyGoalEl = document.getElementById('monthly-goal');
+            const avgPerOrderEl = document.getElementById('avg-per-order');
+            const monthlyGoalValue = monthlyGoalEl?.value || '';
+            const avgPerOrderValue = avgPerOrderEl?.value || '';
+
+            debug('DATA', 'Input values to save', { monthlyGoal: monthlyGoalValue, avgPerOrder: avgPerOrderValue });
+
             const dataToSave = {
                 ...appData,
                 settings: {
-                    monthlyGoal: document.getElementById('monthly-goal')?.value || '',
-                    avgPerOrder: document.getElementById('avg-per-order')?.value || ''
+                    monthlyGoal: monthlyGoalValue,
+                    avgPerOrder: avgPerOrderValue
                 },
                 ui: {
                     ...appData.ui,
@@ -288,8 +295,19 @@
                     lastVisited: Date.now()
                 }
             };
-            localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
-            debug('DATA', 'All data saved successfully', { deliveriesCount: appData.deliveries?.length });
+
+            try {
+                localStorage.setItem('orderCalcData', JSON.stringify(dataToSave));
+                const savedData = localStorage.getItem('orderCalcData');
+                const parsedSavedData = JSON.parse(savedData);
+                debug('DATA', 'All data saved successfully', {
+                    deliveriesCount: appData.deliveries?.length,
+                    settings: parsedSavedData?.settings
+                });
+            } catch (e) {
+                debug('ERROR', 'Failed to save data to localStorage', e);
+                console.error('localStorage error:', e);
+            }
         }
 
         // Save scroll position
@@ -331,17 +349,22 @@
             debug('DATA', 'Loading all data...');
 
             const savedData = localStorage.getItem('orderCalcData');
+            debug('DATA', 'localStorage data found', { hasData: !!savedData, length: savedData?.length });
+
             if (savedData) {
                 try {
                     const parsedData = JSON.parse(savedData);
+                    debug('DATA', 'Parsed data', { settings: parsedData?.settings, ui: parsedData?.ui });
                     appData = parsedData;
 
                     // Restore settings
                     if (parsedData.settings?.monthlyGoal !== undefined) {
                         document.getElementById('monthly-goal').value = parsedData.settings.monthlyGoal;
+                        debug('DATA', 'Restored monthly goal', { value: parsedData.settings.monthlyGoal });
                     }
                     if (parsedData.settings?.avgPerOrder !== undefined) {
                         document.getElementById('avg-per-order').value = parsedData.settings.avgPerOrder;
+                        debug('DATA', 'Restored average per order', { value: parsedData.settings.avgPerOrder });
                     }
 
                     // Restore delivery data
@@ -350,6 +373,9 @@
                     }
                     updateDeliveryList();
                     updateDeliveryStats();
+
+                    // Update analysis display with restored settings
+                    updateAnalysis();
 
                     // Restore previous tab if available, otherwise default to analysis
                     const tabToRestore = parsedData.ui?.currentTab || 'analysis';
