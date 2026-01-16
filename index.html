@@ -375,7 +375,13 @@
         // Restore UI state (tab and scroll position)
         function restoreUIState(tab) {
             if (tab && document.getElementById(`${tab}-section`)) {
-                switchTab(tab);
+                // Show the tab without triggering any load/save
+                document.querySelectorAll('[id$="-section"]').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                welcomeScreen.classList.add('hidden');
+                document.getElementById(`${tab}-section`).classList.remove('hidden');
+
                 // Restore scroll position after tab is visible
                 setTimeout(() => {
                     restoreScrollPosition(`${tab}-section`);
@@ -603,7 +609,7 @@
             }
         });
 
-        function switchTab(tab) {
+        function switchTab(tab, isRestoring = false) {
             debug('UI', 'Switching to tab', { tab, currentTab: appData.ui.currentTab });
 
             // Hide all sections
@@ -619,11 +625,6 @@
 
             // Close tab selector
             tabSelector.classList.add('hidden');
-
-            // Load settings if switching to settings tab
-            if (tab === 'settings') {
-                loadSettings();
-            }
 
             debug('UI', 'Tab switch complete', { newTab: tab });
         }
@@ -650,14 +651,14 @@
 
         // Auto-save when switching tabs
         const originalSwitchTab = switchTab;
-        switchTab = function(tab) {
+        switchTab = function(tab, isRestoring = false) {
             // Save scroll position before switching (skip during initial load)
             if (!isInitialLoad) {
                 saveScrollPositions();
                 saveAllData();
             }
             appData.ui.currentTab = tab;
-            originalSwitchTab(tab);
+            originalSwitchTab(tab, isRestoring);
 
             // Restore scroll position after switching
             setTimeout(() => {
