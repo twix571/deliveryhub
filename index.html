@@ -779,7 +779,7 @@
  document.getElementById('weekly-orders').textContent = `${weeklyOrders}/week`;
 
  // Update progress message
- document.getElementById('progress-message').textContent = `You need ${ordersNeeded} orders at $${avgPerOrder.toFixed(2)} per order to reach your $${monthlyGoal.toFixed(2)} goal.`;
+ document.getElementById('progress-message').textContent = '';
 
  // Calculate progress (if we have delivery data in the future)
  const currentEarnings = appData.analysis?.totalEarnings || 0;
