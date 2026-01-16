@@ -305,15 +305,15 @@
  <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center mb-4 whitespace-nowrap">
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Offer ($)</p>
- <p class="text-white font-large cursor-pointer" id="offer-amount-display" data-type="offer-amount" data-step="0.1">$0.00</p>
+ <p class="text-white font-large cursor-pointer" id="offer-amount-display" data-type="offer-amount" data-step="0.01">$0.00</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Miles</p>
- <p class="text-white font-large cursor-pointer" id="offer-miles-display" data-type="offer-miles" data-step="0.5">0</p>
+ <p class="text-white font-large cursor-pointer" id="offer-miles-display" data-type="offer-miles" data-step="0.01">0</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Time (min)</p>
- <p class="text-white font-large cursor-pointer" id="offer-minutes-display" data-type="offer-minutes" data-step="1">0</p>
+ <p class="text-white font-large cursor-pointer" id="offer-minutes-display" data-type="offer-minutes" data-step="0.01">0</p>
  </div>
  </div>
  <div class="text-center whitespace-nowrap">
@@ -330,15 +330,15 @@
  <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap">
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">MPG</p>
- <p class="text-white font-large cursor-pointer" id="mpg-display" data-type="mpg" data-step="1">0</p>
+ <p class="text-white font-large cursor-pointer" id="mpg-display" data-type="mpg" data-step="0.01">0</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Gas ($/gal)</p>
- <p class="text-white font-large cursor-pointer" id="gas-price-display" data-type="gas-price" data-step="0.1">$0.00</p>
+ <p class="text-white font-large cursor-pointer" id="gas-price-display" data-type="gas-price" data-step="0.01">$0.00</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Min Hourly ($)</p>
- <p class="text-white font-large cursor-pointer" id="hourly-rate-display" data-type="hourly-rate" data-step="1">$0.00</p>
+ <p class="text-white font-large cursor-pointer" id="hourly-rate-display" data-type="hourly-rate" data-step="0.01">$0.00</p>
  </div>
  </div>
  </div>
@@ -996,9 +996,9 @@
  const dragStep = currentDrag.step; // Capture before clearing currentDrag
  const dragType = currentDrag.type;
  let momentumValue = getValueByType(dragType);
- let momentumVelocity = avgVelocity * 5; // Very gentle boost
- const friction = 0.94; // Even faster deceleration
- const minVelocity = 0.2; // Higher stop threshold for even quicker stop
+ let momentumVelocity = avgVelocity * 2; // Reduced boost
+ const friction = 0.80; // Much faster deceleration
+ const minVelocity = 0.5; // Higher stop threshold for quicker stop
 
  momentumInterval = setInterval(() => {
  // Apply friction
@@ -1271,51 +1271,7 @@
  }
  });
 
- // Pull-to-refresh functionality for mobile
- let pullStartY = 0;
- let pullCurrentY = 0;
- let pullDistance = 0;
- let isPulling = false;
- let isRefreshing = false;
- const PULL_THRESHOLD = 100; // pixels to pull down to trigger refresh
-
- function handleTouchStart(e) {
- if (isRefreshing) return;
- if (e.touches.length === 1 && window.scrollY === 0) {
- pullStartY = e.touches[0].clientY;
- isPulling = true;
- }
- }
-
- function handleTouchMove(e) {
- if (!isPulling || isRefreshing) return;
- pullCurrentY = e.touches[0].clientY;
- pullDistance = pullCurrentY - pullStartY;
- }
-
- function handleTouchEnd(e) {
- if (!isPulling || isRefreshing) return;
- isPulling = false;
-
- if (pullDistance >= PULL_THRESHOLD) {
- // Trigger refresh silently
- isRefreshing = true;
- setTimeout(() => {
- // Clear all localStorage
- localStorage.clear();
- sessionStorage.clear();
-
- // Hard refresh the page
- location.reload(true);
- }, 100);
- }
- pullDistance = 0;
- }
-
- // Add touch event listeners for pull-to-refresh
- document.addEventListener('touchstart', handleTouchStart, { passive: true });
- document.addEventListener('touchmove', handleTouchMove, { passive: true });
- document.addEventListener('touchend', handleTouchEnd);
+ 
  </script>
 </body>
 </html>
