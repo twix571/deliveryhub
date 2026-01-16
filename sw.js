@@ -15,13 +15,14 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Only cache GET requests
-        if (event.request.method !== 'GET') {
-          return response;
-        }
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
@@ -31,10 +32,6 @@ self.addEventListener('fetch', (event) => {
         });
       })
       .catch(() => {
-        // Only try cache for GET requests
-        if (event.request.method !== 'GET') {
-          return new Response('Method not supported', { status: 405 });
-        }
         return caches.match(event.request).then(response => {
           if (response) {
             return response;
