@@ -51,8 +51,60 @@
             <!-- Deliveries Section -->
             <div id="deliveries-section" class="hidden w-full h-full p-4 md:p-8 overflow-y-auto hide-scrollbar">
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">Deliveries</h1>
-                <div class="bg-black border border-white rounded-lg p-6">
-                    <p class="text-white">Track your deliveries here</p>
+                <div class="bg-black border border-white rounded-lg p-6 max-w-4xl mx-auto">
+                    <div class="space-y-6">
+                        <!-- Add Delivery Form -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <h2 class="text-xl font-bold text-white mb-4">Add New Delivery</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="delivery-amount" class="block text-white text-lg font-medium mb-2">Earnings ($)</label>
+                                    <input type="number" id="delivery-amount" step="0.01" min="0" placeholder="Enter delivery earnings"
+                                        class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="delivery-date" class="block text-white text-lg font-medium mb-2">Date & Time</label>
+                                    <input type="datetime-local" id="delivery-date"
+                                        class="w-full px-4 py-3 bg-black border border-white text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                                </div>
+                                <button onclick="addDelivery()" class="w-full bg-black border border-white text-white text-lg font-semibold py-3 px-6 rounded-lg transition-colors">
+                                    Add Delivery
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Delivery List -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold text-white">Delivery History</h2>
+                                <button onclick="clearAllDeliveries()" class="text-white text-sm hover:text-gray-300 underline">
+                                    Clear All
+                                </button>
+                            </div>
+                            <div id="delivery-list" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+                                <p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>
+                            </div>
+                        </div>
+
+                        <!-- Summary Stats -->
+                        <div class="bg-black/50 border border-white rounded-lg p-6">
+                            <h2 class="text-xl font-bold text-white mb-4">Summary</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <p class="text-white text-sm">Total Earnings</p>
+                                    <p class="text-white text-2xl font-bold" id="total-earnings">$0.00</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-white text-sm">Total Deliveries</p>
+                                    <p class="text-white text-2xl font-bold" id="total-deliveries">0</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-white text-sm">Average per Delivery</p>
+                                    <p class="text-white text-2xl font-bold" id="avg-delivery">$0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -190,6 +242,9 @@
             }
         };
 
+        // Flag to prevent auto-save during initial load
+        let isInitialLoad = true;
+
         // Save all app data to localStorage
         function saveAllData() {
             const dataToSave = {
@@ -258,18 +313,28 @@
                         document.getElementById('avg-per-order').value = parsedData.settings.avgPerOrder;
                     }
 
-                    // Restore previous tab if available
-                    if (parsedData.ui?.currentTab) {
-                        // Small delay to ensure DOM is ready
-                        setTimeout(() => {
-                            restoreUIState(parsedData.ui.currentTab);
-                        }, 100);
+                    // Restore delivery data
+                    if (!appData.deliveries) {
+                        appData.deliveries = [];
                     }
+                    updateDeliveryList();
+                    updateDeliveryStats();
+
+                    // Restore previous tab if available, otherwise default to analysis
+                    const tabToRestore = parsedData.ui?.currentTab || 'analysis';
+                    setTimeout(() => {
+                        restoreUIState(tabToRestore);
+                    }, 100);
 
                     console.log('All data loaded successfully');
                 } catch (e) {
                     console.error('Error loading data:', e);
                 }
+            } else {
+                // First time - default to analysis tab
+                setTimeout(() => {
+                    restoreUIState('analysis');
+                }, 100);
             }
         }
 
@@ -361,6 +426,99 @@
             }
         }
 
+        // Add a new delivery
+        function addDelivery() {
+            const amount = parseFloat(document.getElementById('delivery-amount').value);
+            const dateInput = document.getElementById('delivery-date').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            const delivery = {
+                id: Date.now(),
+                amount: amount,
+                date: dateInput || new Date().toISOString().slice(0, 16),
+                timestamp: Date.now()
+            };
+
+            appData.deliveries.push(delivery);
+            appData.deliveries.sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
+
+            saveAllData();
+            updateDeliveryList();
+            updateDeliveryStats();
+            updateAnalysis(); // Update analysis with new delivery data
+
+            // Clear form
+            document.getElementById('delivery-amount').value = '';
+            document.getElementById('delivery-date').value = '';
+        }
+
+        // Clear all deliveries
+        function clearAllDeliveries() {
+            if (confirm('Are you sure you want to clear all deliveries? This cannot be undone.')) {
+                appData.deliveries = [];
+                saveAllData();
+                updateDeliveryList();
+                updateDeliveryStats();
+                updateAnalysis();
+            }
+        }
+
+        // Update delivery list display
+        function updateDeliveryList() {
+            const deliveryList = document.getElementById('delivery-list');
+            const deliveries = appData.deliveries || [];
+
+            if (deliveries.length === 0) {
+                deliveryList.innerHTML = '<p class="text-white text-center text-gray-400">No deliveries yet. Add your first delivery above!</p>';
+                return;
+            }
+
+            deliveryList.innerHTML = deliveries.map(delivery => {
+                const date = new Date(delivery.date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="bg-black border border-white rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <p class="text-white font-semibold">$${delivery.amount.toFixed(2)}</p>
+                            <p class="text-white text-sm text-gray-400">${formattedDate}</p>
+                        </div>
+                        <button onclick="deleteDelivery(${delivery.id})" class="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Delete a delivery
+        function deleteDelivery(id) {
+            appData.deliveries = appData.deliveries.filter(d => d.id !== id);
+            saveAllData();
+            updateDeliveryList();
+            updateDeliveryStats();
+            updateAnalysis();
+        }
+
+        // Update delivery statistics
+        function updateDeliveryStats() {
+            const deliveries = appData.deliveries || [];
+            const totalEarnings = deliveries.reduce((sum, d) => sum + d.amount, 0);
+            const totalDeliveries = deliveries.length;
+            const avgPerDelivery = totalDeliveries > 0 ? totalEarnings / totalDeliveries : 0;
+
+            // Update display
+            document.getElementById('total-earnings').textContent = `$${totalEarnings.toFixed(2)}`;
+            document.getElementById('total-deliveries').textContent = totalDeliveries;
+            document.getElementById('avg-delivery').textContent = `$${avgPerDelivery.toFixed(2)}`;
+
+            // Update app data for analysis
+            appData.analysis.totalEarnings = totalEarnings;
+            appData.analysis.totalDeliveries = totalDeliveries;
+            appData.analysis.averagePerDelivery = avgPerDelivery;
+        }
+
         function openTabSelector() {
             tabSelector.classList.remove('hidden');
         }
@@ -434,9 +592,11 @@
         // Auto-save when switching tabs
         const originalSwitchTab = switchTab;
         switchTab = function(tab) {
-            // Save scroll position before switching
-            saveScrollPositions();
-            saveAllData();
+            // Save scroll position before switching (skip during initial load)
+            if (!isInitialLoad) {
+                saveScrollPositions();
+                saveAllData();
+            }
             appData.ui.currentTab = tab;
             originalSwitchTab(tab);
 
@@ -449,6 +609,11 @@
             if (tab === 'analysis') {
                 updateAnalysis();
             }
+
+            // Clear initial load flag after first switch
+            setTimeout(() => {
+                isInitialLoad = false;
+            }, 200);
         };
 
         // Save before page unload
