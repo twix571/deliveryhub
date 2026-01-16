@@ -141,6 +141,110 @@
  display: none;
  }
 
+ /* Custom Numpad Modal */
+ .numpad-modal {
+ position: absolute;
+ inset: 0;
+ background: rgba(0,0,0,0.95);
+ flex-items: center;
+ justify-content: center;
+ z-50;
+ }
+
+ .numpad-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 8px;
+ padding: 16px;
+ }
+
+ .numpad-btn {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ height: 60px;
+ background: black;
+ border: none;
+ outline: none;
+ color: white;
+ font-size: 1.5rem;
+ border-radius: 8px;
+ cursor: pointer;
+ transition: all 0.15s ease;
+ }
+
+ .numpad-btn:hover {
+ background: rgba(255,255,255,0.1);
+ transform: scale(1.02);
+ }
+
+ .numpad-btn:active {
+ background: rgba(255,255,255,0.2);
+ transform: scale(0.98);
+ }
+
+ .numpad-btn:focus {
+ outline: none;
+ box-shadow: none;
+ }
+
+ .numpad-display {
+ width: 100%;
+ padding: 16px;
+ background: black;
+ border: none;
+ outline: none;
+ color: white;
+ font-size: 2rem;
+ text-align: center;
+ border-radius: 8px;
+ margin-bottom: 16px;
+ }
+
+ .numpad-actions {
+ display: flex;
+ gap: 8px;
+ margin-top: 16px;
+ }
+
+ .numpad-action-btn {
+ flex: 1;
+ padding: 12px 16px;
+ background: black;
+ border: none;
+ outline: none;
+ color: white;
+ font-size: 1rem;
+ border-radius: 8px;
+ cursor: pointer;
+ transition: all 0.15s ease;
+ }
+
+ .numpad-action-btn:hover {
+ background: rgba(255,255,255,0.1);
+ }
+
+ .numpad-action-btn:focus {
+ outline: none;
+ box-shadow: none;
+ }
+
+ .numpad-action-btn.delete-btn {
+ color: #ef4444;
+ }
+
+ .numpad-action-btn.delete-btn:hover {
+ background: rgba(239,68,68,0.1);
+ }
+
+ .numpad-action-btn.confirm-btn {
+ color: #22c55e;
+ }
+
+ .numpad-action-btn.confirm-btn:hover {
+ background: rgba(34,197,94,0.1);
+ }
+
  </style>
 </head>
 <body class="bg-black min-h-screen">
@@ -232,6 +336,35 @@
  </div>
  </div>
 
+ <!-- Custom Numpad Modal (Hidden by default) -->
+ <div id="numpad-modal" class="hidden absolute inset-0 bg-black/90 flex items-center justify-center z-50">
+ <div class="bg-black p-6 max-w-sm w-full mx-4 whitespace-nowrap">
+ <div class="flex justify-between items-center mb-4 whitespace-nowrap">
+ <h3 class="text-white font-large">Enter Value</h3>
+ <button onclick="closeNumpad()" class="text-white font-large hover:text-gray-300">&times;</button>
+ </div>
+ <div class="numpad-display" id="numpad-display">0</div>
+ <div class="numpad-grid">
+ <button onclick="numpadPress('1')" class="numpad-btn">1</button>
+ <button onclick="numpadPress('2')" class="numpad-btn">2</button>
+ <button onclick="numpadPress('3')" class="numpad-btn">3</button>
+ <button onclick="numpadPress('4')" class="numpad-btn">4</button>
+ <button onclick="numpadPress('5')" class="numpad-btn">5</button>
+ <button onclick="numpadPress('6')" class="numpad-btn">6</button>
+ <button onclick="numpadPress('7')" class="numpad-btn">7</button>
+ <button onclick="numpadPress('8')" class="numpad-btn">8</button>
+ <button onclick="numpadPress('9')" class="numpad-btn">9</button>
+ <button onclick="numpadPress('.')" class="numpad-btn">.</button>
+ <button onclick="numpadPress('0')" class="numpad-btn">0</button>
+ <button onclick="numpadDelete()" class="numpad-btn" style="color: #ef4444;">←</button>
+ </div>
+ <div class="numpad-actions">
+ <button onclick="closeNumpad()" class="numpad-action-btn delete-btn">Cancel</button>
+ <button onclick="numpadConfirm()" class="numpad-action-btn confirm-btn">Confirm</button>
+ </div>
+ </div>
+ </div>
+
  <!-- Content Sections -->
  <div id="content-area" class="w-full h-full flex items-center justify-center whitespace-nowrap">
  <!-- Deliveries Section -->
@@ -266,7 +399,7 @@
  Add Delivery
  </button>
  </div>
- <p class="text-white text-center font-small text-gray-400 whitespace-nowrap">Drag on values to adjust</p>
+ <p class="text-white text-center font-small text-gray-400 whitespace-nowrap">Drag or tap values to adjust</p>
  </div>
 
  <hr style="border: 0; border-top: 0.5px solid white;">
@@ -1003,7 +1136,9 @@
  startValue: getValueByType(type),
  prevX: clientX,
  lastTime: Date.now(),
- velocities: [] // Store recent velocities for smoothing
+ velocities: [], // Store recent velocities for smoothing
+ totalMovementX: 0,
+ totalMovementY: 0
  };
 
  e.preventDefault();
@@ -1050,6 +1185,11 @@
 
  currentDrag.prevX = clientX;
  currentDrag.speedMultiplier = speedMultiplier;
+
+ // Track total movement for click detection
+ currentDrag.totalMovementX = Math.abs(clientX - currentDrag.startX);
+ currentDrag.totalMovementY = Math.abs(clientY - currentDrag.startY);
+
  e.preventDefault();
  };
 
@@ -1071,13 +1211,23 @@
                              currentDrag.velocities.length > 0 &&
                              Math.abs(currentDrag.velocities[currentDrag.velocities.length - 1]) > 0.05;
 
+ // Detect if this was a click vs drag (movement < 5px)
+ const isClick = currentDrag.totalMovementX < 5 && currentDrag.totalMovementY < 5;
+
+ // If it's a click (not a drag), open numpad
+ if (isClick) {
+ openNumpad(currentDrag.type);
+ currentDrag = null;
+ return;
+ }
+
  // Apply momentum if there's significant velocity AND recent movement
  if (currentDrag.velocities && currentDrag.velocities.length > 0 && hasRecentMovement) {
  const dragStep = currentDrag.step; // Capture before clearing currentDrag
  const dragType = currentDrag.type;
  let momentumValue = getValueByType(dragType);
  let momentumVelocity = avgVelocity * 12 * speedMultiplier; // Apply speed multiplier to momentum
- const friction = 0.98; // Very slow deceleration
+ const friction = 0.85; // Faster deceleration
  const minVelocity = 0.01; // Ultra low stop threshold
 
  momentumInterval = setInterval(() => {
@@ -1141,6 +1291,55 @@
  const el = document.getElementById(type);
  if (el) el.value = value;
  }
+ }
+
+ // Numpad functions
+ let currentNumpadType = null;
+ let numpadValue = '';
+
+ function openNumpad(type) {
+ currentNumpadType = type;
+ numpadValue = getValueByType(type).toFixed(2);
+ updateNumpadDisplay();
+ document.getElementById('numpad-modal').classList.remove('hidden');
+ }
+
+ function closeNumpad() {
+ currentNumpadType = null;
+ numpadValue = '';
+ document.getElementById('numpad-modal').classList.add('hidden');
+ }
+
+ function updateNumpadDisplay() {
+ const display = document.getElementById('numpad-display');
+ display.textContent = numpadValue || '0';
+ }
+
+ function numpadPress(key) {
+ if (key === '.' && numpadValue.includes('.')) return;
+ if (numpadValue === '0' && key !== '.') {
+ numpadValue = key;
+ } else if (numpadValue.length < 10) {
+ numpadValue += key;
+ }
+ updateNumpadDisplay();
+ }
+
+ function numpadDelete() {
+ numpadValue = numpadValue.slice(0, -1);
+ if (numpadValue === '') numpadValue = '0';
+ updateNumpadDisplay();
+ }
+
+ function numpadConfirm() {
+ if (currentNumpadType && numpadValue !== '') {
+ const value = parseFloat(numpadValue) || 0;
+ setValueByType(currentNumpadType, value);
+ saveAllData();
+ updateQuickOfferDisplay();
+ updateDeliveryFormDisplay();
+ }
+ closeNumpad();
  }
 
  function openTabSelector() {
@@ -1263,7 +1462,22 @@
  closeSettingsPopup();
  }
  });
- 
+
+ // Close numpad when clicking outside
+ const numpadModal = document.getElementById('numpad-modal');
+ numpadModal.addEventListener('click', (e) => {
+ if (e.target === numpadModal) {
+ closeNumpad();
+ }
+ });
+
+ // Close numpad on escape key
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'Escape' && !numpadModal.classList.contains('hidden')) {
+ closeNumpad();
+ }
+ });
+
  function switchTab(tab, isRestoring = false) {
  debug('UI', 'Switching to tab', { tab, currentTab: appData.ui.currentTab });
 
