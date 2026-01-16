@@ -153,6 +153,9 @@
  Settings
  </button>
  </div>
+ <button onclick="location.reload()" class="absolute bottom-8 right-8 bg-black text-white font-small py-2 px-4 rounded-lg transition-colors hover:bg-white/10">
+ Refresh
+ </button>
  </div>
 
  <!-- Settings Modal Popup (Hidden by default) -->
@@ -1073,19 +1076,19 @@
 
  // Open DoorDash app
  function openDoorDash() {
- window.location.href = 'doordash://';
+ window.location.href = 'dasher://';
  console.log('Opening DoorDash app');
  }
 
  // Open Shipt app
  function openShipt() {
- window.location.href = 'shipt://';
+ window.location.href = 'shopper://';
  console.log('Opening Shipt app');
  }
 
  // Open Uber Eats app
  function openUberEats() {
- window.location.href = 'ubereats://';
+ window.location.href = 'uberdriver://';
  console.log('Opening Uber Eats app');
  }
 
