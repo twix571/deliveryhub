@@ -20,7 +20,6 @@
 
  /* Hide scrollbar visually while allowing scrolling */
  html, body, * {
- -webkit-overflow-scrolling: touch;
  scrollbar-width: none; /* Firefox */
  -ms-overflow-style: none; /* IE 10+ */
  }
@@ -36,8 +35,6 @@
  -webkit-touch-callout: none !important;
  -webkit-user-select: none !important;
  user-select: none !important;
- pointer-events: auto;
- touch-action: manipulation;
  }
 
  /* Autosizing base font - scales with viewport width */
@@ -352,15 +349,15 @@
  <div class="grid grid-cols-3 gap-3 md:gap-8 justify-items-center whitespace-nowrap">
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">MPG</p>
- <p class="text-white font-large cursor-pointer" id="mpg-display" data-type="mpg" data-step="0.01">0</p>
+ <p class="text-white font-large" id="mpg-display">0</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Gas ($/gal)</p>
- <p class="text-white font-large cursor-pointer" id="gas-price-display" data-type="gas-price" data-step="0.01">$0.00</p>
+ <p class="text-white font-large" id="gas-price-display">$0.00</p>
  </div>
  <div class="flex flex-col items-center whitespace-nowrap">
  <p class="text-white font-small text-gray-400 mb-1">Min Hourly ($)</p>
- <p class="text-white font-large cursor-pointer" id="hourly-rate-display" data-type="hourly-rate" data-step="0.01">$0.00</p>
+ <p class="text-white font-large" id="hourly-rate-display">$0.00</p>
  </div>
  </div>
  </div>
@@ -829,7 +826,7 @@
 
  document.getElementById('offer-result-text').innerHTML = resultHtml;
  } else {
- document.getElementById('offer-result-text').textContent = 'Drag values above';
+ document.getElementById('offer-result-text').textContent = 'Enter values above';
  }
  }
 
@@ -994,7 +991,7 @@
 
  const deltaX = clientX - currentDrag.startX;
 
- const pixelsPerStep = 20;
+ const pixelsPerStep = 2;
  const steps = Math.round(deltaX / pixelsPerStep);
  const newValue = Math.max(0, currentDrag.startValue + (steps * currentDrag.step));
 
@@ -1018,9 +1015,9 @@
  const dragStep = currentDrag.step; // Capture before clearing currentDrag
  const dragType = currentDrag.type;
  let momentumValue = getValueByType(dragType);
- let momentumVelocity = avgVelocity * 2; // Reduced boost
- const friction = 0.80; // Much faster deceleration
- const minVelocity = 0.5; // Higher stop threshold for quicker stop
+ let momentumVelocity = avgVelocity * 12; // Maximum boost
+ const friction = 0.98; // Very slow deceleration
+ const minVelocity = 0.01; // Ultra low stop threshold
 
  momentumInterval = setInterval(() => {
  // Apply friction
