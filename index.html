@@ -356,6 +356,9 @@
 
         // Save settings to localStorage (legacy function, kept for compatibility)
         function saveSettings() {
+            // Close tab selector if open to prevent interference
+            tabSelector.classList.add('hidden');
+
             saveAllData();
 
             const saveMessage = document.getElementById('save-message');
@@ -366,9 +369,17 @@
 
             // Update analysis and navigate to analysis page after saving
             updateAnalysis();
+
+            // Direct navigation to analysis using base switchTab logic
             setTimeout(() => {
-                switchTab('analysis');
-            }, 500);
+                document.querySelectorAll('[id$="-section"]').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                welcomeScreen.classList.add('hidden');
+                document.getElementById('analysis-section').classList.remove('hidden');
+                appData.ui.currentTab = 'analysis';
+                isInitialLoad = false;
+            }, 600);
         }
 
         // Calculate and update analysis page
