@@ -925,47 +925,117 @@
 
  // Drag gesture handler for quick value adjustment
  let currentDrag = null;
- 
+ let momentumInterval = null;
+
  function setupDragGestures() {
  const dragElements = document.querySelectorAll('[data-type]');
- 
+
  const handleStart = (e) => {
  const el = e.target.closest('[data-type]');
  if (!el) return;
- 
+
  const type = el.dataset.type;
  const step = parseFloat(el.dataset.step) || 1;
- 
+ const clientX = e.clientX || e.touches[0].clientX;
+
+ // Stop any existing momentum
+ if (momentumInterval) {
+ clearInterval(momentumInterval);
+ momentumInterval = null;
+ }
+
  currentDrag = {
  type,
  step,
- startX: e.clientX || e.touches[0].clientX,
+ startX: clientX,
  startY: e.clientY || e.touches[0].clientY,
- startValue: getValueByType(type)
+ startValue: getValueByType(type),
+ prevX: clientX,
+ lastTime: Date.now(),
+ velocities: [] // Store recent velocities for smoothing
  };
- 
+
  e.preventDefault();
  };
- 
+
  const handleMove = (e) => {
  if (!currentDrag) return;
- 
+
  const clientX = e.clientX || e.touches[0].clientX;
+ const currentTime = Date.now();
+ const deltaTime = currentTime - currentDrag.lastTime;
+
+ // Calculate velocity
+ if (deltaTime > 0) {
+ const velocity = (clientX - currentDrag.prevX) / deltaTime;
+
+ // Ensure velocities array exists
+ if (!currentDrag.velocities) {
+ currentDrag.velocities = [];
+ }
+
+ currentDrag.velocities.push(velocity);
+
+ // Keep only last 5 velocities for smoothing
+ if (currentDrag.velocities.length > 5) {
+ currentDrag.velocities.shift();
+ }
+
+ currentDrag.lastTime = currentTime;
+ }
+
  const deltaX = clientX - currentDrag.startX;
- 
+
  const pixelsPerStep = 20;
  const steps = Math.round(deltaX / pixelsPerStep);
  const newValue = Math.max(0, currentDrag.startValue + (steps * currentDrag.step));
- 
+
  setValueByType(currentDrag.type, newValue);
+
+ currentDrag.prevX = clientX;
  e.preventDefault();
  };
- 
+
  const handleEnd = () => {
  if (!currentDrag) return;
- currentDrag = null;
+
+ // Calculate average velocity from recent movements
+ let avgVelocity = 0;
+ if (currentDrag.velocities && currentDrag.velocities.length > 0) {
+ avgVelocity = currentDrag.velocities.reduce((sum, v) => sum + v, 0) / currentDrag.velocities.length;
+ }
+
+ // Apply momentum if there's significant velocity
+ if (currentDrag.velocities && currentDrag.velocities.length > 0) {
+ const dragStep = currentDrag.step; // Capture before clearing currentDrag
+ const dragType = currentDrag.type;
+ let momentumValue = getValueByType(dragType);
+ let momentumVelocity = avgVelocity * 5; // Very gentle boost
+ const friction = 0.94; // Even faster deceleration
+ const minVelocity = 0.2; // Higher stop threshold for even quicker stop
+
+ momentumInterval = setInterval(() => {
+ // Apply friction
+ momentumVelocity *= friction;
+ momentumValue += momentumVelocity * dragStep;
+
+ // Update value
+ setValueByType(dragType, Math.max(0, momentumValue));
+
+ // Stop when velocity is too low
+ if (Math.abs(momentumVelocity) < minVelocity) {
+ clearInterval(momentumInterval);
+ momentumInterval = null;
  saveAllData();
  updateQuickOfferDisplay();
+ }
+ }, 16);
+ } else {
+ saveAllData();
+ updateQuickOfferDisplay();
+ }
+
+ currentDrag = null;
  };
  
  dragElements.forEach(el => {
