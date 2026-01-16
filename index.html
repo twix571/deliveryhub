@@ -31,7 +31,7 @@
 
  /* Prevent zoom on input fields for mobile */
  input, textarea, select {
- font-size: 16px !important;
+ font-size: clamp(17px, 16px + 0.4vw, 20px) !important;
  -webkit-touch-callout: none !important;
  -webkit-user-select: none !important;
  user-select: none !important;
@@ -39,7 +39,7 @@
 
  /* Autosizing base font - scales with viewport width */
  html {
- font-size: calc(0.8rem + 0.5vw);
+ font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
  }
 
  h1, h2, h3, h4, h5, h6, p, span, div, button, input, label {
@@ -72,17 +72,17 @@
 
  
 
- /* Font size classes - only 3 sizes allowed */
+ /* Font size classes - only 3 dynamic sizes allowed */
  .font-small {
- font-size: 0.75rem;
+ font-size: clamp(0.65rem, 0.6rem + 0.25vw, 0.85rem);
  }
 
  .font-medium {
- font-size: 1.35rem;
+ font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
  }
 
  .font-large {
- font-size: 1.8rem;
+ font-size: clamp(1.5rem, 1.3rem + 1.2vw, 2.2rem);
  }
 
  /* Prevent wrapping */
@@ -107,33 +107,56 @@
  justify-content: center;
  width: 50px;
  height: 50px;
- border: 1px solid white;
  border-radius: 6px;
  background: transparent;
  color: white;
  cursor: pointer;
- transition: all 0.2s ease;
+ transition: text-shadow 0.2s ease;
  }
- .app-launch-btn:hover {
- background: rgba(255,255,255,0.1);
- transform: scale(1.05);
+.app-launch-btn:hover .app-icon,
+.app-launch-btn:hover .app-tiny {
+ text-shadow: 0 0 6px white, 0 0 12px white !important;
+ }
+.app-launch-btn.doordash {
+ color: #ef4444;
+ text-shadow: 0 0 3px #ef4444, 0 0 6px #ef4444;
+ }
+.app-launch-btn.doordash:hover .app-icon {
+ text-shadow: 0 0 6px #ef4444, 0 0 12px #ef4444 !important;
+ }
+.app-launch-btn:hover .app-icon[style*="22c55e"] {
+ text-shadow: 0 0 6px #22c55e, 0 0 12px #22c55e !important;
  }
  .app-launch-btn:active {
  transform: scale(0.95);
  }
  .app-icon {
- font-size: 0.8rem;
+ font-size: clamp(1.5rem, 1.3rem + 1.2vw, 2.2rem);
  margin-bottom: 0.1rem;
  }
+ .app-tiny {
+ font-size: clamp(0.65rem, 0.6rem + 0.25vw, 0.85rem);
+ margin-left: 1px;
+ letter-spacing: -0.05em;
+ }
+ .app-launch-btn.row {
+ flex-direction: row;
+ gap: 0;
+ align-items: center;
+ }
+.app-launch-btn.row .app-tiny {
+ margin-left: 0;
+ transform: translateX(-2px) translateY(8px);
+ }
  .app-name {
- font-size: 0.5rem;
+ font-size: clamp(0.65rem, 0.6rem + 0.25vw, 0.85rem);
  white-space: nowrap;
  }
  .app-launch-bar {
  display: flex;
  justify-content: center;
  align-items: center;
- gap: 8px;
+ gap: 28px;
  padding: 0.5rem;
  border-top: 1px solid rgba(255,255,255,0.2);
  }
@@ -167,7 +190,7 @@
  border: none;
  outline: none;
  color: white;
- font-size: 1.5rem;
+ font-size: clamp(1.5rem, 1.3rem + 1.2vw, 2.2rem);
  border-radius: 8px;
  cursor: pointer;
  transition: all 0.15s ease;
@@ -195,7 +218,7 @@
  border: none;
  outline: none;
  color: white;
- font-size: 2rem;
+ font-size: clamp(1.5rem, 1.3rem + 1.2vw, 2.2rem);
  text-align: center;
  border-radius: 8px;
  margin-bottom: 16px;
@@ -214,7 +237,7 @@
  border: none;
  outline: none;
  color: white;
- font-size: 1rem;
+ font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
  border-radius: 8px;
  cursor: pointer;
  transition: all 0.15s ease;
@@ -439,17 +462,16 @@
 
  <!-- App Launch Bar -->
  <div class="app-launch-bar">
- <button onclick="openDoorDash()" class="app-launch-btn">
- <div class="app-icon">DD</div>
- <div class="app-name">DoorDash</div>
+ <button onclick="openDoorDash()" class="app-launch-btn doordash">
+ <div class="app-icon" style="text-shadow: 0 0 3px #ef4444, 0 0 6px #ef4444;">DD</div>
  </button>
- <button onclick="openShipt()" class="app-launch-btn">
- <div class="app-icon">S</div>
- <div class="app-name">Shipt</div>
+ <button onclick="openShipt()" class="app-launch-btn row">
+ <div class="app-icon" style="text-shadow: 0 0 3px white, 0 0 6px white;">S</div>
+ <div class="app-tiny" style="text-shadow: 0 0 3px white, 0 0 6px white;">hipt</div>
  </button>
- <button onclick="openUberEats()" class="app-launch-btn">
- <div class="app-icon">UE</div>
- <div class="app-name">Uber Eats</div>
+ <button onclick="openUberEats()" class="app-launch-btn" style="flex-direction: row;">
+ <div class="app-icon" style="color: white; text-shadow: 0 0 3px white, 0 0 6px white;">U</div>
+ <div class="app-icon" style="color: #22c55e; text-shadow: 0 0 3px #22c55e, 0 0 6px #22c55e; margin-left: -4px;">E</div>
  </button>
  </div>
  </div>
@@ -547,17 +569,16 @@
 
  <!-- App Launch Bar -->
  <div class="app-launch-bar">
- <button onclick="openDoorDash()" class="app-launch-btn">
- <div class="app-icon">DD</div>
- <div class="app-name">DoorDash</div>
+ <button onclick="openDoorDash()" class="app-launch-btn doordash">
+ <div class="app-icon" style="text-shadow: 0 0 3px #ef4444, 0 0 6px #ef4444;">DD</div>
  </button>
- <button onclick="openShipt()" class="app-launch-btn">
- <div class="app-icon">S</div>
- <div class="app-name">Shipt</div>
+ <button onclick="openShipt()" class="app-launch-btn row">
+ <div class="app-icon" style="text-shadow: 0 0 3px white, 0 0 6px white;">S</div>
+ <div class="app-tiny" style="text-shadow: 0 0 3px white, 0 0 6px white;">hipt</div>
  </button>
- <button onclick="openUberEats()" class="app-launch-btn">
- <div class="app-icon">UE</div>
- <div class="app-name">Uber Eats</div>
+ <button onclick="openUberEats()" class="app-launch-btn" style="flex-direction: row;">
+ <div class="app-icon" style="color: white; text-shadow: 0 0 3px white, 0 0 6px white;">U</div>
+ <div class="app-icon" style="color: #22c55e; text-shadow: 0 0 3px #22c55e, 0 0 6px #22c55e; margin-left: -4px;">E</div>
  </button>
  </div>
  </div>
@@ -575,17 +596,16 @@
 
  <!-- App Launch Bar -->
  <div class="app-launch-bar">
- <button onclick="openDoorDash()" class="app-launch-btn">
- <div class="app-icon">DD</div>
- <div class="app-name">DoorDash</div>
+ <button onclick="openDoorDash()" class="app-launch-btn doordash">
+ <div class="app-icon" style="text-shadow: 0 0 3px #ef4444, 0 0 6px #ef4444;">DD</div>
  </button>
- <button onclick="openShipt()" class="app-launch-btn">
- <div class="app-icon">S</div>
- <div class="app-name">Shipt</div>
+ <button onclick="openShipt()" class="app-launch-btn row">
+ <div class="app-icon" style="text-shadow: 0 0 3px white, 0 0 6px white;">S</div>
+ <div class="app-tiny" style="text-shadow: 0 0 3px white, 0 0 6px white;">hipt</div>
  </button>
- <button onclick="openUberEats()" class="app-launch-btn">
- <div class="app-icon">UE</div>
- <div class="app-name">Uber Eats</div>
+ <button onclick="openUberEats()" class="app-launch-btn" style="flex-direction: row;">
+ <div class="app-icon" style="color: white; text-shadow: 0 0 3px white, 0 0 6px white;">U</div>
+ <div class="app-icon" style="color: #22c55e; text-shadow: 0 0 3px #22c55e, 0 0 6px #22c55e; margin-left: -4px;">E</div>
  </button>
  </div>
  </div>
