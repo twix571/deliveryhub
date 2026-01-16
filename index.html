@@ -16,7 +16,6 @@
  html, body, * {
  font-family: 'Share Tech Mono', monospace !important; font-weight: 200;
  letter-spacing: 0.03em;
- touch-action: manipulation;
  }
 
  /* Hide scrollbar visually while allowing scrolling */
@@ -38,6 +37,7 @@
  -webkit-user-select: none !important;
  user-select: none !important;
  pointer-events: auto;
+ touch-action: manipulation;
  }
 
  /* Autosizing base font - scales with viewport width */
@@ -1090,6 +1090,29 @@
  // Double-click handler
  contentArea.addEventListener('dblclick', (e) => {
  openTabSelector();
+ });
+
+ // Double-tap handler for mobile
+ let lastTapTime = 0;
+ let lastTapTarget = null;
+ const DOUBLE_TAP_TIMEOUT = 300; // milliseconds between taps
+ const DOUBLE_TAP_DISTANCE = 50; // max distance between taps (pixels)
+
+ contentArea.addEventListener('touchend', function(e) {
+ const currentTime = new Date().getTime();
+ const timeSinceLastTap = currentTime - lastTapTime;
+ const currentTarget = e.target;
+
+ // Check if it's a double-tap
+ if (timeSinceLastTap < DOUBLE_TAP_TIMEOUT && lastTapTarget === currentTarget) {
+ e.preventDefault();
+ openTabSelector();
+ lastTapTime = 0;
+ lastTapTarget = null;
+ } else {
+ lastTapTime = currentTime;
+ lastTapTarget = currentTarget;
+ }
  });
 
  // Button click handler
