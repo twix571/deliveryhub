@@ -1,4 +1,4 @@
-const CACHE_NAME = 'delivery-goals-v2';
+const CACHE_NAME = 'delivery-goals-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -18,6 +18,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+        // Only cache GET requests
+        if (event.request.method !== 'GET') {
+          return response;
+        }
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
@@ -27,11 +31,14 @@ self.addEventListener('fetch', (event) => {
         });
       })
       .catch(() => {
+        // Only try cache for GET requests
+        if (event.request.method !== 'GET') {
+          return new Response('Method not supported', { status: 405 });
+        }
         return caches.match(event.request).then(response => {
           if (response) {
             return response;
           }
-          // Return a 404-like response for missing resources
           return new Response('Not found', { status: 404 });
         });
       })
