@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
  <title>Delivery Goals</title>
  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
  <meta http-equiv="Pragma" content="no-cache">
@@ -16,6 +16,28 @@
  html, body, * {
  font-family: 'Share Tech Mono', monospace !important; font-weight: 200;
  letter-spacing: 0.03em;
+ touch-action: manipulation;
+ }
+
+ /* Hide scrollbar visually while allowing scrolling */
+ html, body, * {
+ -webkit-overflow-scrolling: touch;
+ scrollbar-width: none; /* Firefox */
+ -ms-overflow-style: none; /* IE 10+ */
+ }
+ html::-webkit-scrollbar,
+ body::-webkit-scrollbar,
+ *::-webkit-scrollbar {
+ display: none; /* Chrome, Safari, Opera */
+ }
+
+ /* Prevent zoom on input fields for mobile */
+ input, textarea, select {
+ font-size: 16px !important;
+ -webkit-touch-callout: none !important;
+ -webkit-user-select: none !important;
+ user-select: none !important;
+ pointer-events: auto;
  }
 
  /* Autosizing base font - scales with viewport width */
