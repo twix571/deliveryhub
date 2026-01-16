@@ -1,4 +1,4 @@
-const CACHE_NAME = 'delivery-goals-v1';
+const CACHE_NAME = 'delivery-goals-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -18,13 +18,22 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
         return caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, response.clone());
           return response;
         });
       })
       .catch(() => {
-        return caches.match(event.request);
+        return caches.match(event.request).then(response => {
+          if (response) {
+            return response;
+          }
+          // Return a 404-like response for missing resources
+          return new Response('Not found', { status: 404 });
+        });
       })
   );
 });
